@@ -5,3 +5,4 @@ export * from "./risk-reward";
 export * from "./risk-pct";
 export * from "./discipline";
 export * from "./clusters";
+export * from "./window";
