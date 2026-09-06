@@ -23,7 +23,7 @@ export async function getTrade(supabase: Client, tradeId: string) {
   return data;
 }
 
-function toInsertRow(input: TradeFormInput, pipValue: number, symbol: string) {
+function toInsertRow(input: TradeFormInput, pipValue: number, symbol: string, disciplineScore: number) {
   return {
     traded_at: input.tradedAt,
     symbol,
@@ -36,20 +36,33 @@ function toInsertRow(input: TradeFormInput, pipValue: number, symbol: string) {
     exit_type: input.exitType,
     result_total: input.resultTotal,
     pip_value: pipValue,
+    checklist: input.checklist,
+    discipline_score: disciplineScore,
   };
 }
 
-export async function createTrade(supabase: Client, input: TradeFormInput, pipValue: number, symbol: string = DEFAULT_SYMBOL) {
+export async function createTrade(
+  supabase: Client,
+  input: TradeFormInput,
+  pipValue: number,
+  disciplineScore: number,
+  symbol: string = DEFAULT_SYMBOL,
+) {
   const { data, error } = await supabase
     .from("trades")
-    .insert(toInsertRow(input, pipValue, symbol))
+    .insert(toInsertRow(input, pipValue, symbol, disciplineScore))
     .select("id")
     .single();
   if (error) throw error;
   return data;
 }
 
-export async function updateTrade(supabase: Client, tradeId: string, input: TradeFormInput) {
+export async function updateTrade(
+  supabase: Client,
+  tradeId: string,
+  input: TradeFormInput,
+  disciplineScore: number,
+) {
   const { data, error } = await supabase
     .from("trades")
     .update({
@@ -62,6 +75,8 @@ export async function updateTrade(supabase: Client, tradeId: string, input: Trad
       target_pct: input.targetPct ?? null,
       exit_type: input.exitType,
       result_total: input.resultTotal,
+      checklist: input.checklist,
+      discipline_score: disciplineScore,
     })
     .eq("id", tradeId)
     .select("id")

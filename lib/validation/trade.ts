@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { checklistSchema } from "./checklist";
 
 export const EXIT_TYPES = ["parcial", "0x0", "cheio", "loss"] as const;
 
@@ -13,6 +14,9 @@ export const tradeFormSchema = z
     targetPct: z.coerce.number().min(0).max(100).optional(),
     exitType: z.enum(EXIT_TYPES, { message: "Selecione o tipo de saída." }),
     resultTotal: z.coerce.number(),
+    // O checklist não bloqueia o salvamento — só é validado quanto à forma
+    // (chaves conhecidas, valores booleanos), nunca exigido como completo.
+    checklist: checklistSchema.default({}),
   })
   .refine((data) => data.entryPrice !== data.stopPrice, {
     message: "Entrada e stop não podem ser iguais.",
