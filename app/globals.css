@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+:root {
+  --color-bg: #0b0b0f;
+  --color-surface: #111117;
+  --color-primary: #7c3aed;
+  --color-primary-light: #8b5cf6;
+  --color-secondary: #2563eb;
+  --color-secondary-light: #3b82f6;
+  --color-gold: #d4af37;
+  --color-gold-light: #f5c451;
+  --color-text-primary: #f5f5fa;
+  --color-text-secondary: #c7c7da;
+  --color-text-muted: #9a9ab0;
+  --color-text-disabled: #6e6e82;
+  --color-success: #5dcaa5;
+  --color-danger: #e24b4a;
+}
+
+@theme inline {
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-primary: var(--color-primary);
+  --color-primary-light: var(--color-primary-light);
+  --color-secondary: var(--color-secondary);
+  --color-secondary-light: var(--color-secondary-light);
+  --color-gold: var(--color-gold);
+  --color-gold-light: var(--color-gold-light);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+  --color-text-disabled: var(--color-text-disabled);
+  --color-success: var(--color-success);
+  --color-danger: var(--color-danger);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+}
+
+.bg-gradient-brand {
+  background-image: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+}
+
+.text-gradient-brand {
+  background-image: linear-gradient(135deg, var(--color-primary-light), var(--color-secondary-light));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
