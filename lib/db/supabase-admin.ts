@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "./database.types";
 import { getSupabaseServiceRoleKey, getSupabaseUrl } from "./env";
 
 /**
@@ -8,7 +9,7 @@ import { getSupabaseServiceRoleKey, getSupabaseUrl } from "./env";
  * faz o build falhar se este módulo acabar sendo incluído num bundle de cliente.
  */
 export function createAdminClient() {
-  return createSupabaseClient(getSupabaseUrl(), getSupabaseServiceRoleKey(), {
+  return createSupabaseClient<Database>(getSupabaseUrl(), getSupabaseServiceRoleKey(), {
     auth: {
       autoRefreshToken: false,
       persistSession: false,

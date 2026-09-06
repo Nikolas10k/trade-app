@@ -33,12 +33,13 @@ export function Button({
   className = "",
   variant = "primary",
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "ghost" }) {
+}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "ghost" | "danger" }) {
   const base =
     "inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50";
   const variants = {
     primary: "bg-gradient-brand text-white hover:brightness-110",
     ghost: "border border-white/15 text-text-primary hover:bg-white/5",
+    danger: "bg-danger text-white hover:brightness-110",
   };
   return <button className={`${base} ${variants[variant]} ${className}`} {...props} />;
 }

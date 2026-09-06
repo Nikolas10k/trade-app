@@ -9,21 +9,13 @@ import {
   resetPasswordSchema,
   signUpSchema,
 } from "@/lib/validation/auth";
+import { fieldErrorsFromZod } from "@/lib/validation/zod-errors";
 
 export type ActionState = {
   ok: boolean;
   message?: string;
   fieldErrors?: Record<string, string>;
 };
-
-function fieldErrorsFromZod(error: { issues: { path: PropertyKey[]; message: string }[] }) {
-  const fieldErrors: Record<string, string> = {};
-  for (const issue of error.issues) {
-    const key = String(issue.path[0] ?? "form");
-    if (!fieldErrors[key]) fieldErrors[key] = issue.message;
-  }
-  return fieldErrors;
-}
 
 export async function signUpAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const parsed = signUpSchema.safeParse({
