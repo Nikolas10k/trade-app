@@ -192,6 +192,30 @@ export interface Database {
         }>;
         Relationships: [];
       };
+      app_admins: {
+        Row: { user_id: string; created_at: string };
+        // Escrita só via service role (bootstrap/endpoints admin) — nunca pelo client anon/authenticated.
+        Insert: { user_id: string; created_at?: string };
+        Update: Partial<{ user_id: string }>;
+        Relationships: [];
+      };
+      payment_events: {
+        Row: {
+          id: string;
+          event_type: string;
+          preapproval_id: string | null;
+          received_at: string;
+        };
+        // Escrita só via service role (webhook).
+        Insert: {
+          id: string;
+          event_type: string;
+          preapproval_id?: string | null;
+          received_at?: string;
+        };
+        Update: Partial<{ event_type: string; preapproval_id: string | null }>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

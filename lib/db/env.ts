@@ -23,3 +23,20 @@ export function getSupabaseServiceRoleKey(): string {
 export function getAppBaseUrl(): string {
   return required("APP_BASE_URL");
 }
+
+export function getMpAccessToken(): string {
+  return required("MP_ACCESS_TOKEN");
+}
+
+export function getMpWebhookSecret(): string {
+  return required("MP_WEBHOOK_SECRET");
+}
+
+export function getMpPreapprovalPlanId(plan: "mensal" | "trimestral" | "anual"): string {
+  const envVar = {
+    mensal: "MP_PREAPPROVAL_PLAN_MENSAL",
+    trimestral: "MP_PREAPPROVAL_PLAN_TRIMESTRAL",
+    anual: "MP_PREAPPROVAL_PLAN_ANUAL",
+  }[plan];
+  return required(envVar);
+}

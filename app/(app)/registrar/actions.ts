@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { disciplineScore, riskPctOfBalance } from "@/lib/calc";
 import { ALL_CHECKLIST_KEYS } from "@/lib/checklist/keys";
+import { getAccessState } from "@/lib/auth/access";
 import { requireUser } from "@/lib/auth/session";
 import { createClient } from "@/lib/db/supabase-server";
 import { createTrade, DEFAULT_SYMBOL, getUserInstrument, updateTrade } from "@/lib/trades";
@@ -41,6 +42,16 @@ export async function saveTradeAction(
   formData: FormData,
 ): Promise<TradeActionState> {
   const user = await requireUser();
+
+  // Paywall revalidado a cada chamada, direto no servidor — nunca confia em
+  // nada que o formulário diga sobre o estado da assinatura (11.E.1-2).
+  const access = await getAccessState();
+  if (access.readOnly) {
+    return {
+      ok: false,
+      message: "Sua conta está em modo somente-leitura. Assine um plano para continuar registrando trades.",
+    };
+  }
 
   const parsed = parseForm(formData);
   if (!parsed.success) {

@@ -8,6 +8,7 @@ import {
   windowStartUTC,
   winRateWindow,
 } from "@/lib/calc";
+import { getAccessState } from "@/lib/auth/access";
 import { createClient } from "@/lib/db/supabase-server";
 import { DEFAULT_SYMBOL } from "@/lib/trades";
 import { BalanceChart } from "./balance-chart";
@@ -23,6 +24,7 @@ const EXIT_TYPE_LABELS: Record<string, string> = {
 };
 
 export default async function DashboardPage() {
+  const access = await getAccessState();
   const supabase = await createClient();
   const {
     data: { user },
@@ -53,9 +55,15 @@ export default async function DashboardPage() {
             Você ainda não registrou nenhum trade — assim que registrar, suas métricas e
             gráficos aparecem aqui.
           </p>
-          <Link href="/registrar" className="text-sm text-secondary-light hover:underline">
-            Registrar meu primeiro trade
-          </Link>
+          {access.readOnly ? (
+            <Link href="/planos" className="text-sm text-secondary-light hover:underline">
+              Sua conta está em modo somente-leitura — ver planos
+            </Link>
+          ) : (
+            <Link href="/registrar" className="text-sm text-secondary-light hover:underline">
+              Registrar meu primeiro trade
+            </Link>
+          )}
         </div>
       </div>
     );
@@ -100,11 +108,19 @@ export default async function DashboardPage() {
       ).slice(0, 3)
     : [];
 
-  const showTrialBanner = subscription?.status === "trial" && subscription.trial_ends_at;
+  const showTrialBanner = !access.readOnly && subscription?.status === "trial" && subscription.trial_ends_at;
 
   return (
     <div>
-      {showTrialBanner ? (
+      {access.readOnly ? (
+        <div className="mb-6 rounded-xl border border-gold/30 bg-surface px-4 py-3 text-sm text-text-secondary">
+          Sua conta está em modo somente-leitura
+          {access.isSuspended ? " (conta suspensa)." : " — o período de teste ou a assinatura expirou."}{" "}
+          <Link href="/planos" className="text-secondary-light hover:underline">
+            Ver planos
+          </Link>
+        </div>
+      ) : showTrialBanner ? (
         <div className="mb-6 rounded-xl bg-gradient-brand px-4 py-3 text-sm text-white">
           Você está no período de teste gratuito até{" "}
           {new Date(subscription!.trial_ends_at!).toLocaleDateString("pt-BR")}.
@@ -182,12 +198,21 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <Link
-        href="/registrar"
-        className="inline-flex items-center justify-center rounded-lg bg-gradient-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110"
-      >
-        Registrar trade
-      </Link>
+      {access.readOnly ? (
+        <span
+          title="Conta em modo somente-leitura — assine um plano para registrar trades."
+          className="inline-flex cursor-not-allowed items-center justify-center rounded-lg bg-white/10 px-4 py-2.5 text-sm font-semibold text-text-disabled"
+        >
+          Registrar trade
+        </span>
+      ) : (
+        <Link
+          href="/registrar"
+          className="inline-flex items-center justify-center rounded-lg bg-gradient-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110"
+        >
+          Registrar trade
+        </Link>
+      )}
     </div>
   );
 }

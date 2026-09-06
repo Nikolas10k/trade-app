@@ -266,3 +266,93 @@ describe("idempotência de webhook (nível de dado)", () => {
     expect(secondAttempt.rows).toHaveLength(0);
   });
 });
+
+describe("paywall — reforçado a nível de banco (defesa em profundidade)", () => {
+  const insertTradeSql = `
+    insert into public.trades
+      (user_id, traded_at, account_balance, entry_price, stop_price, lot_size, exit_type, result_total, pip_value)
+    values ($1, now(), 10000, 2345.60, 2343.10, 0.10, 'loss', -50, 0.10)
+    returning id`;
+
+  it("usuário em trial vigente (padrão do trigger de cadastro) consegue inserir", async () => {
+    const trader = await createTestUser("trial-ok@example.com");
+    const result = await asUser(trader, (c) => c.query(insertTradeSql, [trader]));
+    expect(result.rows).toHaveLength(1);
+  });
+
+  it("trial expirado bloqueia o insert mesmo com sessão válida e RLS de dono satisfeita", async () => {
+    const trader = await createTestUser("trial-expired@example.com");
+    await asServiceRole((c) =>
+      c.query("update public.subscriptions set trial_ends_at = now() - interval '1 day' where user_id = $1", [
+        trader,
+      ]),
+    );
+
+    await expect(asUser(trader, (c) => c.query(insertTradeSql, [trader]))).rejects.toThrow(
+      /row-level security/i,
+    );
+  });
+
+  it("assinatura ativa vigente permite inserir mesmo com o trial já expirado", async () => {
+    const trader = await createTestUser("active-ok@example.com");
+    await asServiceRole((c) =>
+      c.query(
+        `update public.subscriptions
+         set trial_ends_at = now() - interval '1 day', status = 'active', current_period_end = now() + interval '10 days'
+         where user_id = $1`,
+        [trader],
+      ),
+    );
+
+    const result = await asUser(trader, (c) => c.query(insertTradeSql, [trader]));
+    expect(result.rows).toHaveLength(1);
+  });
+
+  it("cortesia (comp_until) vigente permite inserir mesmo com assinatura cancelada", async () => {
+    const trader = await createTestUser("comp-ok@example.com");
+    await asServiceRole((c) =>
+      c.query(
+        `update public.subscriptions
+         set trial_ends_at = now() - interval '1 day', status = 'canceled', comp_until = now() + interval '5 days'
+         where user_id = $1`,
+        [trader],
+      ),
+    );
+
+    const result = await asUser(trader, (c) => c.query(insertTradeSql, [trader]));
+    expect(result.rows).toHaveLength(1);
+  });
+
+  it("conta suspensa bloqueia o insert mesmo com assinatura ativa vigente", async () => {
+    const trader = await createTestUser("suspended@example.com");
+    await asServiceRole(async (c) => {
+      await c.query(
+        `update public.subscriptions set status = 'active', current_period_end = now() + interval '10 days' where user_id = $1`,
+        [trader],
+      );
+      await c.query("update public.profiles set is_suspended = true where id = $1", [trader]);
+    });
+
+    await expect(asUser(trader, (c) => c.query(insertTradeSql, [trader]))).rejects.toThrow(
+      /row-level security/i,
+    );
+  });
+
+  it("trial expirado também bloqueia UPDATE de um trade já existente", async () => {
+    const trader = await createTestUser("update-blocked@example.com");
+    const insert = await asUser(trader, (c) => c.query(insertTradeSql, [trader]));
+    const tradeId = insert.rows[0].id;
+
+    await asServiceRole((c) =>
+      c.query("update public.subscriptions set trial_ends_at = now() - interval '1 day' where user_id = $1", [
+        trader,
+      ]),
+    );
+
+    await expect(
+      asUser(trader, (c) =>
+        c.query("update public.trades set result_total = 1 where id = $1", [tradeId]),
+      ),
+    ).rejects.toThrow(/row-level security/i);
+  });
+});
