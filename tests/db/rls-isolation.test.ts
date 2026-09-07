@@ -356,3 +356,92 @@ describe("paywall — reforçado a nível de banco (defesa em profundidade)", ()
     ).rejects.toThrow(/row-level security/i);
   });
 });
+
+describe("escritas administrativas (funções atômicas)", () => {
+  async function promoteToAdmin(userId: string) {
+    await asServiceRole((c) =>
+      c.query("insert into public.app_admins (user_id) values ($1)", [userId]),
+    );
+  }
+
+  it("admin_extend_trial estende o trial e grava audit_log na mesma chamada", async () => {
+    const admin = await createTestUser("admin-write-1@example.com");
+    const trader = await createTestUser("trader-write-1@example.com");
+    await promoteToAdmin(admin);
+
+    await asServiceRole((c) =>
+      c.query("select public.admin_extend_trial($1, 10, $2)", [trader, admin]),
+    );
+
+    const sub = await withFixtureSetup((c) =>
+      c.query("select trial_ends_at from public.subscriptions where user_id = $1", [trader]),
+    );
+    const audit = await withFixtureSetup((c) =>
+      c.query(
+        "select actor_id, user_id, action, metadata from public.audit_log where user_id = $1 and action = 'admin_extend_trial'",
+        [trader],
+      ),
+    );
+
+    expect(new Date(sub.rows[0].trial_ends_at).getTime()).toBeGreaterThan(Date.now() + 9 * 24 * 60 * 60 * 1000);
+    expect(audit.rows).toHaveLength(1);
+    expect(audit.rows[0].actor_id).toBe(admin);
+    expect(audit.rows[0].metadata).toEqual({ days: 10 });
+  });
+
+  it("admin_grant_comp concede cortesia e grava audit_log", async () => {
+    const admin = await createTestUser("admin-write-2@example.com");
+    const trader = await createTestUser("trader-write-2@example.com");
+    await promoteToAdmin(admin);
+
+    await asServiceRole((c) => c.query("select public.admin_grant_comp($1, 30, $2)", [trader, admin]));
+
+    const sub = await withFixtureSetup((c) =>
+      c.query("select comp_until from public.subscriptions where user_id = $1", [trader]),
+    );
+    expect(sub.rows[0].comp_until).not.toBeNull();
+
+    const audit = await withFixtureSetup((c) =>
+      c.query("select action from public.audit_log where user_id = $1 and action = 'admin_grant_comp'", [
+        trader,
+      ]),
+    );
+    expect(audit.rows).toHaveLength(1);
+  });
+
+  it("admin_set_suspended suspende/reativa e grava a ação certa no audit_log", async () => {
+    const admin = await createTestUser("admin-write-3@example.com");
+    const trader = await createTestUser("trader-write-3@example.com");
+    await promoteToAdmin(admin);
+
+    await asServiceRole((c) => c.query("select public.admin_set_suspended($1, true, $2)", [trader, admin]));
+    const suspended = await withFixtureSetup((c) =>
+      c.query("select is_suspended from public.profiles where id = $1", [trader]),
+    );
+    expect(suspended.rows[0].is_suspended).toBe(true);
+
+    await asServiceRole((c) => c.query("select public.admin_set_suspended($1, false, $2)", [trader, admin]));
+    const reactivated = await withFixtureSetup((c) =>
+      c.query("select is_suspended from public.profiles where id = $1", [trader]),
+    );
+    expect(reactivated.rows[0].is_suspended).toBe(false);
+
+    const audit = await withFixtureSetup((c) =>
+      c.query(
+        "select action from public.audit_log where user_id = $1 and action in ('admin_suspend','admin_reactivate') order by created_at asc",
+        [trader],
+      ),
+    );
+    expect(audit.rows.map((r) => r.action)).toEqual(["admin_suspend", "admin_reactivate"]);
+  });
+
+  it("nem admin nem trader autenticado conseguem chamar as funções de escrita direto (só service_role)", async () => {
+    const admin = await createTestUser("admin-write-4@example.com");
+    const trader = await createTestUser("trader-write-4@example.com");
+    await promoteToAdmin(admin);
+
+    await expect(
+      asUser(admin, (c) => c.query("select public.admin_set_suspended($1, true, $2)", [trader, admin])),
+    ).rejects.toThrow(/permission denied/i);
+  });
+});

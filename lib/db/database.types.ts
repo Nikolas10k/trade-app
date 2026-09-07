@@ -218,6 +218,23 @@ export interface Database {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      is_admin: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      admin_extend_trial: {
+        Args: { target_user_id: string; extend_days: number; actor_id: string };
+        Returns: void;
+      };
+      admin_grant_comp: {
+        Args: { target_user_id: string; comp_days: number; actor_id: string };
+        Returns: void;
+      };
+      admin_set_suspended: {
+        Args: { target_user_id: string; suspended: boolean; actor_id: string };
+        Returns: void;
+      };
+    };
   };
 }

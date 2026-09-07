@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { requireUser } from "@/lib/auth/session";
-import { LogoutButton } from "./logout-button";
+import { LogoutButton } from "@/components/logout-button";
 import { NavLinks } from "./nav-links";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {

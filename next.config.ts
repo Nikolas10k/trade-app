@@ -43,6 +43,11 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Habilita forbidden()/unauthorized() (usados por requireAdmin) para dar
+  // um 403 de verdade em vez de um redirect genérico.
+  experimental: {
+    authInterrupts: true,
+  },
   async headers() {
     return [
       {

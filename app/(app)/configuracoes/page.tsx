@@ -1,21 +1,9 @@
 import Link from "next/link";
 import { Card } from "@/components/ui";
 import { createClient } from "@/lib/db/supabase-server";
+import { PLAN_LABELS, SUBSCRIPTION_STATUS_LABELS } from "@/lib/subscriptions/labels";
 
 export const metadata = { title: "Configurações — Diário XAU/USD" };
-
-const STATUS_LABELS: Record<string, string> = {
-  trial: "Em teste gratuito",
-  active: "Ativa",
-  past_due: "Pagamento pendente",
-  canceled: "Cancelada",
-};
-
-const PLAN_LABELS: Record<string, string> = {
-  mensal: "Mensal",
-  trimestral: "Trimestral",
-  anual: "Anual",
-};
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -39,7 +27,7 @@ export default async function SettingsPage() {
         <dl className="mb-4 space-y-2 text-sm">
           <div className="flex justify-between">
             <dt className="text-text-muted">Status</dt>
-            <dd className="text-text-primary">{STATUS_LABELS[subscription?.status ?? "trial"]}</dd>
+            <dd className="text-text-primary">{SUBSCRIPTION_STATUS_LABELS[subscription?.status ?? "trial"]}</dd>
           </div>
           {subscription?.plan ? (
             <div className="flex justify-between">
