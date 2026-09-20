@@ -300,13 +300,13 @@ export function TradeForm({
                 <h3 className="mb-2 text-sm font-medium text-text-secondary">{phase.title}</h3>
                 <ul className="space-y-2">
                   {phase.items.map((item) => (
-                    <li key={item.key}>
+                    <li key={item.id}>
                       <label className="flex cursor-pointer items-start gap-2 text-sm text-text-primary">
                         <input
                           type="checkbox"
-                          name={`checklist_${item.key}`}
-                          checked={checklist[item.key] ?? false}
-                          onChange={() => toggleChecklistItem(item.key)}
+                          name={`checklist_${item.id}`}
+                          checked={checklist[item.id] ?? false}
+                          onChange={() => toggleChecklistItem(item.id)}
                           className="mt-0.5 h-4 w-4 rounded border-white/20 bg-black/20"
                         />
                         {item.label}
