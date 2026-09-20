@@ -1,9 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { Card } from "@/components/ui";
-import { GoldCoin } from "@/components/gold-coin";
 import { HeroVideoBackground } from "@/components/hero-video-background";
-import { PriceChartMark } from "@/components/price-chart-mark";
 import { AccountDeletedBanner } from "./account-deleted-banner";
 
 const ctaClass =
@@ -31,26 +29,18 @@ export default function LandingPage() {
           </nav>
         </header>
 
-        <section className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-12 px-6 py-16 md:grid-cols-2 md:py-24">
-          <div className="text-center md:text-left">
-            <PriceChartMark className="mx-auto mb-6 h-14 w-56 md:mx-0" />
-
-            <h1 className="text-4xl font-bold leading-tight text-text-primary drop-shadow-[0_2px_16px_rgba(0,0,0,0.7)] sm:text-5xl">
-              Registre cada trade em <span className="text-gradient-brand">XAU/USD</span> e siga
-              o seu próprio método
-            </h1>
-            <p className="mx-auto mt-6 max-w-xl text-lg text-text-secondary drop-shadow-[0_1px_8px_rgba(0,0,0,0.8)] md:mx-0">
-              Diário de trades manual com checklist de 13 pontos, medidor de disciplina e zonas
-              quentes de preço — para operadores que já têm um método e querem segui-lo.
-            </p>
-            <Link href="/cadastro" className={`${ctaClass} mt-8 px-8 py-3 text-base`}>
-              Começar 3 dias grátis
-            </Link>
-          </div>
-
-          <div className="relative hidden h-80 items-center justify-center md:flex">
-            <GoldCoin className="h-56 w-56" />
-          </div>
+        <section className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center px-6 py-16 text-center md:py-24">
+          <h1 className="max-w-2xl text-4xl font-bold leading-tight text-text-primary drop-shadow-[0_2px_16px_rgba(0,0,0,0.7)] sm:text-5xl">
+            Registre cada trade em <span className="text-gradient-brand">XAU/USD</span> e siga o
+            seu próprio método
+          </h1>
+          <p className="mt-6 max-w-xl text-lg text-text-secondary drop-shadow-[0_1px_8px_rgba(0,0,0,0.8)]">
+            Diário de trades manual com checklist de 13 pontos, medidor de disciplina e zonas
+            quentes de preço — para operadores que já têm um método e querem segui-lo.
+          </p>
+          <Link href="/cadastro" className={`${ctaClass} mt-8 px-8 py-3 text-base`}>
+            Começar 3 dias grátis
+          </Link>
         </section>
       </div>
 
