@@ -51,3 +51,71 @@ body {
   -webkit-background-clip: text;
   color: transparent;
 }
+
+.login-hero {
+  background: radial-gradient(circle at 15% 15%, #17131f 0%, var(--color-bg) 55%);
+}
+
+.login-hero-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  opacity: 0.35;
+  animation: login-orb-float 14s ease-in-out infinite;
+}
+
+.login-hero-orb-gold {
+  top: -8rem;
+  right: -6rem;
+  height: 22rem;
+  width: 22rem;
+  background: var(--color-gold);
+}
+
+.login-hero-orb-blue {
+  bottom: -10rem;
+  left: -8rem;
+  height: 26rem;
+  width: 26rem;
+  background: var(--color-secondary);
+  animation-delay: -7s;
+}
+
+.login-hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(circle at 30% 40%, black, transparent 75%);
+}
+
+.login-hero-chart-line {
+  stroke-dasharray: 240;
+  stroke-dashoffset: 240;
+  animation: login-chart-draw 2.4s ease-out forwards;
+}
+
+@keyframes login-orb-float {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-1.5rem, 1.5rem) scale(1.08);
+  }
+}
+
+@keyframes login-chart-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-hero-orb,
+  .login-hero-chart-line {
+    animation: none;
+  }
+}
