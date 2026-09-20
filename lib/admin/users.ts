@@ -22,7 +22,8 @@ export type AdminUserRow = {
  * *_select_admin (Fase 1) já dão a um admin autenticado leitura dessas
  * tabelas sem precisar de service role — menor privilégio (0.2).
  */
-export async function listUsersForAdmin(query?: string): Promise<AdminUserRow[]> {
+/** Todos os usuários — sem filtro, para que a tela de admin possa derivar tanto a tabela (filtrada por busca) quanto os KPIs (sobre o total) da mesma leitura. */
+export async function listUsersForAdmin(): Promise<AdminUserRow[]> {
   const admin = createAdminClient();
   const supabase = await createClient();
 
@@ -36,7 +37,7 @@ export async function listUsersForAdmin(query?: string): Promise<AdminUserRow[]>
   const subsByUser = new Map((subscriptions ?? []).map((s) => [s.user_id, s]));
   const suspendedByUser = new Map((profiles ?? []).map((p) => [p.id, p.is_suspended]));
 
-  const rows = authData.users.map((u): AdminUserRow => {
+  return authData.users.map((u): AdminUserRow => {
     const sub = subsByUser.get(u.id);
     return {
       id: u.id,
@@ -51,10 +52,12 @@ export async function listUsersForAdmin(query?: string): Promise<AdminUserRow[]>
       isSuspended: suspendedByUser.get(u.id) ?? false,
     };
   });
+}
 
-  if (!query) return rows;
+export function filterUsersByEmail(users: AdminUserRow[], query?: string): AdminUserRow[] {
+  if (!query) return users;
   const needle = query.trim().toLowerCase();
-  return rows.filter((r) => r.email?.toLowerCase().includes(needle));
+  return users.filter((u) => u.email?.toLowerCase().includes(needle));
 }
 
 export async function getUserForAdmin(userId: string): Promise<AdminUserRow | null> {

@@ -1,6 +1,9 @@
 import Link from "next/link";
-import { listUsersForAdmin } from "@/lib/admin/users";
+import { formatMoney } from "@/lib/calc";
+import { computeAdminKpis } from "@/lib/admin/kpis";
+import { filterUsersByEmail, listUsersForAdmin } from "@/lib/admin/users";
 import { PLAN_LABELS, SUBSCRIPTION_STATUS_LABELS } from "@/lib/subscriptions/labels";
+import { KpiCard } from "./kpi-card";
 
 export const metadata = { title: "Usuários — Admin" };
 
@@ -10,11 +13,57 @@ export default async function AdminUsersPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   const { q } = await searchParams;
-  const users = await listUsersForAdmin(q);
+  const allUsers = await listUsersForAdmin();
+  const users = filterUsersByEmail(allUsers, q);
+  const kpis = computeAdminKpis(allUsers);
+
+  const statusEntries = Object.entries(kpis.byStatus) as [keyof typeof kpis.byStatus, number][];
 
   return (
     <div>
-      <h1 className="mb-2 text-2xl font-semibold text-text-primary">Usuários</h1>
+      <h1 className="mb-6 text-2xl font-semibold text-text-primary">Usuários</h1>
+
+      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <KpiCard
+          icon="usuarios"
+          label="Usuários"
+          value={kpis.totalUsers}
+          hint={`+${kpis.newSignups[7]} nos últimos 7 dias · +${kpis.newSignups[30]} em 30 dias`}
+        />
+        <KpiCard
+          icon="mrr"
+          label="MRR estimado"
+          value={formatMoney(kpis.mrrEstimateBRL)}
+          hint="Soma do equivalente mensal das assinaturas ativas — estimativa, não substitui a Mercado Pago"
+          gold
+        />
+        <KpiCard
+          icon="trial"
+          label="Trials terminando"
+          value={kpis.trialsEndingSoon}
+          hint="Nos próximos 7 dias"
+        />
+        <KpiCard icon="suspenso" label="Contas suspensas" value={kpis.suspendedCount} />
+      </div>
+
+      <div className="mb-6 rounded-2xl border border-white/10 bg-surface p-6">
+        <h2 className="mb-4 font-semibold text-text-primary">Assinaturas por status</h2>
+        <ul className="space-y-2">
+          {statusEntries.map(([status, count]) => (
+            <li key={status} className="flex items-center gap-3 text-sm">
+              <span className="w-36 text-text-muted">{SUBSCRIPTION_STATUS_LABELS[status]}</span>
+              <div className="h-2 flex-1 rounded-full bg-white/5">
+                <div
+                  className="h-2 rounded-full bg-gradient-brand"
+                  style={{ width: kpis.totalUsers ? `${(count / kpis.totalUsers) * 100}%` : "0%" }}
+                />
+              </div>
+              <span className="w-8 text-right text-text-secondary">{count}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
       <p className="mb-6 text-sm text-text-muted">
         Conta, status de assinatura e atividade. O conteúdo dos trades de cada usuário não é
         acessível por aqui (Seção 10).

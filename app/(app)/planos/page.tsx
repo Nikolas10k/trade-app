@@ -1,13 +1,10 @@
+import { formatMoney } from "@/lib/calc";
+import { PLAN_LABELS } from "@/lib/subscriptions/labels";
+import { PLAN_BILLING, PLAN_ORDER, monthlyEquivalent } from "@/lib/subscriptions/pricing";
 import { Button, Card } from "@/components/ui";
 import { subscribeAction } from "./actions";
 
 export const metadata = { title: "Planos — Diário XAU/USD" };
-
-const PLANS = [
-  { key: "mensal" as const, label: "Mensal", price: "R$ 14,99", period: "/mês" },
-  { key: "trimestral" as const, label: "Trimestral", price: "R$ 39,00", period: "/trimestre (≈ R$ 13,00/mês)" },
-  { key: "anual" as const, label: "Anual", price: "R$ 129,00", period: "/ano (≈ R$ 10,75/mês)", highlight: true },
-];
 
 export default function PlansPage() {
   return (
@@ -18,20 +15,28 @@ export default function PlansPage() {
         quiser pelo portal da Mercado Pago.
       </p>
       <div className="grid gap-4 sm:grid-cols-3">
-        {PLANS.map((plan) => (
-          <Card key={plan.key} className={plan.highlight ? "border-gold/40" : undefined}>
-            <h2 className="mb-1 font-semibold text-text-primary">{plan.label}</h2>
-            <p className="mb-4 text-2xl font-bold text-text-primary">
-              {plan.price}
-              <span className="text-sm font-normal text-text-muted"> {plan.period}</span>
-            </p>
-            <form action={subscribeAction.bind(null, plan.key)}>
-              <Button type="submit" className="w-full">
-                Assinar
-              </Button>
-            </form>
-          </Card>
-        ))}
+        {PLAN_ORDER.map((key) => {
+          const { price, months, periodLabel } = PLAN_BILLING[key];
+          return (
+            <Card key={key} className={key === "anual" ? "border-gold/40" : undefined}>
+              <h2 className="mb-1 font-semibold text-text-primary">{PLAN_LABELS[key]}</h2>
+              <p className="mb-4 text-2xl font-bold text-text-primary">
+                {formatMoney(price)}
+                <span className="text-sm font-normal text-text-muted"> /{periodLabel}</span>
+                {months > 1 ? (
+                  <span className="block text-sm font-normal text-text-muted">
+                    ≈ {formatMoney(monthlyEquivalent(key))}/mês
+                  </span>
+                ) : null}
+              </p>
+              <form action={subscribeAction.bind(null, key)}>
+                <Button type="submit" className="w-full">
+                  Assinar
+                </Button>
+              </form>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
