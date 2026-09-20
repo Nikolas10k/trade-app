@@ -8,7 +8,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-bg">
-      <header className="border-b border-white/10">
+      <header className="sticky top-0 z-20 border-b border-white/10 bg-bg/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center justify-between">
             <span className="text-sm font-bold text-gradient-brand">Diário XAU/USD</span>

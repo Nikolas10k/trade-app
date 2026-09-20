@@ -131,20 +131,24 @@ export default async function DashboardPage() {
 
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
+          icon="saldo"
           label="Saldo"
           value={formatMoney(latestBalance)}
           hint={balanceChangePct !== null ? `${balanceChangePct >= 0 ? "+" : ""}${balanceChangePct.toFixed(1)}% em 30d` : undefined}
         />
         <MetricCard
+          icon="assertividade"
           label="Assertividade 15d"
           value={winRate15.rate !== null ? `${winRate15.rate.toFixed(0)}%` : "—"}
           hint={`${winRate15.count} trade${winRate15.count === 1 ? "" : "s"}`}
         />
         <MetricCard
+          icon="tela"
           label="Horas de tela 30d"
           value={`${screenTime30.toFixed(1)}h`}
         />
         <MetricCard
+          icon="disciplina"
           label="Disciplina 30d"
           value={disciplineAvg30 !== null ? disciplineAvg30.toFixed(0) : "—"}
           hint={disciplineAvg30 === null ? "Sem dados suficientes" : undefined}

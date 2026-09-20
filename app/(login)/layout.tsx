@@ -1,40 +1,20 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { AmbientBackground } from "@/components/ambient-background";
+import { PriceChartMark } from "@/components/price-chart-mark";
 
 export default function LoginLayout({ children }: { children: ReactNode }) {
   return (
     <div className="grid min-h-screen md:grid-cols-2">
-      <section className="login-hero relative hidden overflow-hidden md:flex md:flex-col md:justify-between md:p-12">
-        <div className="login-hero-orb login-hero-orb-gold" aria-hidden />
-        <div className="login-hero-orb login-hero-orb-blue" aria-hidden />
-        <div className="login-hero-grid" aria-hidden />
+      <section className="relative hidden overflow-hidden md:flex md:flex-col md:justify-between md:p-12">
+        <AmbientBackground />
 
         <Link href="/" className="relative z-10 text-lg font-bold text-gradient-brand">
           Diário XAU/USD
         </Link>
 
         <div className="relative z-10 max-w-md">
-          <svg
-            viewBox="0 0 200 60"
-            className="login-hero-chart mb-8 h-16 w-48"
-            fill="none"
-            aria-hidden
-          >
-            <path
-              d="M2 45 L2 30 M2 37 L8 37 M8 42 L8 20 M8 31 L14 31 M14 38 L14 22 M14 30 L20 30 M20 25 L20 10 M20 17 L26 17 M26 22 L26 5 M26 13 L32 13"
-              stroke="var(--color-danger)"
-              strokeWidth="2"
-              strokeLinecap="round"
-              opacity="0.55"
-            />
-            <path
-              className="login-hero-chart-line"
-              d="M2 40 C 30 38, 45 20, 70 24 S 110 8, 140 14 S 175 4, 198 6"
-              stroke="var(--color-gold-light)"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-          </svg>
+          <PriceChartMark className="mb-8 h-16 w-48" />
 
           <h1 className="text-3xl font-bold leading-tight text-text-primary">
             Sua disciplina, medida a cada operação em{" "}

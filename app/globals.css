@@ -52,19 +52,26 @@ body {
   color: transparent;
 }
 
-.login-hero {
+/*
+ * Fundo ambiente reutilizável (orbs com glow + grade sutil) — usado no hero da
+ * landing page e no painel da tela de login para dar identidade visual coesa
+ * sem depender de imagens/vídeos externos.
+ */
+.ambient-bg {
+  position: relative;
   background: radial-gradient(circle at 15% 15%, #17131f 0%, var(--color-bg) 55%);
 }
 
-.login-hero-orb {
+.ambient-orb {
   position: absolute;
   border-radius: 9999px;
   filter: blur(90px);
   opacity: 0.35;
-  animation: login-orb-float 14s ease-in-out infinite;
+  animation: ambient-orb-float 14s ease-in-out infinite;
+  pointer-events: none;
 }
 
-.login-hero-orb-gold {
+.ambient-orb-gold {
   top: -8rem;
   right: -6rem;
   height: 22rem;
@@ -72,7 +79,7 @@ body {
   background: var(--color-gold);
 }
 
-.login-hero-orb-blue {
+.ambient-orb-blue {
   bottom: -10rem;
   left: -8rem;
   height: 26rem;
@@ -81,7 +88,7 @@ body {
   animation-delay: -7s;
 }
 
-.login-hero-grid {
+.ambient-grid {
   position: absolute;
   inset: 0;
   background-image:
@@ -89,15 +96,36 @@ body {
     linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: radial-gradient(circle at 30% 40%, black, transparent 75%);
+  pointer-events: none;
 }
 
-.login-hero-chart-line {
+.ambient-chart-line {
   stroke-dasharray: 240;
   stroke-dashoffset: 240;
-  animation: login-chart-draw 2.4s ease-out forwards;
+  animation: ambient-chart-draw 2.4s ease-out forwards;
 }
 
-@keyframes login-orb-float {
+/* Elevação sutil de superfície: realce de 1px no topo, como vidro fosco. */
+.surface-elevated {
+  position: relative;
+  isolation: isolate;
+}
+
+.surface-elevated::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0) 40%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes ambient-orb-float {
   0%,
   100% {
     transform: translate(0, 0) scale(1);
@@ -107,15 +135,15 @@ body {
   }
 }
 
-@keyframes login-chart-draw {
+@keyframes ambient-chart-draw {
   to {
     stroke-dashoffset: 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .login-hero-orb,
-  .login-hero-chart-line {
+  .ambient-orb,
+  .ambient-chart-line {
     animation: none;
   }
 }

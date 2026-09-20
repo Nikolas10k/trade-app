@@ -3,7 +3,7 @@ import { type ButtonHTMLAttributes, type InputHTMLAttributes, type LabelHTMLAttr
 export function Card({ className = "", ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={`rounded-2xl border border-white/10 bg-surface p-6 shadow-xl shadow-black/20 ${className}`}
+      className={`surface-elevated rounded-2xl border border-white/10 bg-surface p-6 shadow-xl shadow-black/20 ${className}`}
       {...props}
     />
   );
@@ -35,11 +35,13 @@ export function Button({
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "ghost" | "danger" }) {
   const base =
-    "inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50";
+    "inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none";
   const variants = {
-    primary: "bg-gradient-brand text-white hover:brightness-110",
-    ghost: "border border-white/15 text-text-primary hover:bg-white/5",
-    danger: "bg-danger text-white hover:brightness-110",
+    primary:
+      "bg-gradient-brand text-white shadow-lg shadow-primary/20 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/30 hover:brightness-110",
+    ghost: "border border-white/15 text-text-primary hover:border-white/25 hover:bg-white/5",
+    danger:
+      "bg-danger text-white shadow-lg shadow-danger/20 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-danger/30 hover:brightness-110",
   };
   return <button className={`${base} ${variants[variant]} ${className}`} {...props} />;
 }
