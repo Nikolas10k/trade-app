@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui";
 import { createClient } from "@/lib/db/supabase-server";
 import { PLAN_LABELS, SUBSCRIPTION_STATUS_LABELS } from "@/lib/subscriptions/labels";
+import { DeleteAccountForm } from "./delete-account-form";
 
 export const metadata = { title: "Configurações — Diário XAU/USD" };
 
@@ -54,10 +55,35 @@ export default async function SettingsPage() {
       </Card>
 
       <Card>
-        <p className="text-text-secondary">
-          Instrumento, preferências, segurança (2FA) e exportação/exclusão de dados (LGPD)
-          chegam na Fase 7.
+        <h2 className="mb-3 font-semibold text-text-primary">Seus dados (LGPD)</h2>
+        <p className="mb-3 text-sm text-text-secondary">
+          Baixe uma cópia de tudo o que registramos sobre você.
         </p>
+        <div className="mb-6 flex flex-wrap gap-3">
+          <a
+            href="/api/lgpd/export?format=json"
+            className="rounded-lg border border-white/15 px-4 py-2 text-sm text-text-primary hover:bg-white/5"
+          >
+            Baixar tudo (JSON)
+          </a>
+          <a
+            href="/api/lgpd/export?format=csv"
+            className="rounded-lg border border-white/15 px-4 py-2 text-sm text-text-primary hover:bg-white/5"
+          >
+            Baixar trades (CSV)
+          </a>
+        </div>
+
+        <h3 className="mb-2 text-sm font-semibold text-danger">Zona de risco</h3>
+        <p className="mb-3 text-sm text-text-secondary">
+          Excluir sua conta apaga todos os seus trades, checklist e histórico de forma real e
+          definitiva. Não tem como desfazer.
+        </p>
+        <DeleteAccountForm />
+      </Card>
+
+      <Card>
+        <p className="text-text-secondary">Instrumento, preferências e segurança (2FA) chegam na Fase 8.</p>
       </Card>
     </div>
   );

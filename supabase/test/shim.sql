@@ -34,3 +34,11 @@ begin
   end if;
 end
 $$;
+
+-- No Supabase real, quem apaga de auth.users é o serviço de autenticação
+-- (GoTrue) via sua própria credencial interna, não a role "service_role" do
+-- PostgREST. Aqui simplificamos: service_role também representa esse
+-- back-end privilegiado, só para testar que os ON DELETE CASCADE/SET NULL
+-- do nosso schema funcionam quando um usuário deixa de existir.
+grant usage on schema auth to service_role;
+grant select, insert, update, delete on auth.users to service_role;

@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { Card } from "@/components/ui";
+import { AccountDeletedBanner } from "./account-deleted-banner";
 
 const ctaClass =
   "inline-flex items-center justify-center rounded-lg bg-gradient-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110";
@@ -7,6 +9,9 @@ const ctaClass =
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col">
+      <Suspense fallback={null}>
+        <AccountDeletedBanner />
+      </Suspense>
       <header className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-6">
         <span className="text-lg font-bold text-gradient-brand">Diário XAU/USD</span>
         <nav className="flex items-center gap-3">

@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { logAuditEvent } from "@/lib/audit/log";
 import { getAppBaseUrl } from "@/lib/db/env";
 import { createClient } from "@/lib/db/supabase-server";
 import {
@@ -62,13 +63,15 @@ export async function logInAction(_prev: ActionState, formData: FormData): Promi
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {
     // Mensagem genérica: não revela se o e-mail existe, está errado ou não foi
     // verificado (evita enumeração de contas).
     return { ok: false, message: "E-mail ou senha inválidos, ou conta ainda não verificada." };
   }
+
+  await logAuditEvent({ actorId: data.user.id, userId: data.user.id, action: "login" });
 
   redirect("/dashboard");
 }
@@ -121,6 +124,8 @@ export async function resetPasswordAction(
   if (error) {
     return { ok: false, message: "Não foi possível redefinir a senha. Peça um novo link." };
   }
+
+  await logAuditEvent({ actorId: user.id, userId: user.id, action: "password_change" });
 
   redirect("/dashboard");
 }

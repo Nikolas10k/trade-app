@@ -445,3 +445,61 @@ describe("escritas administrativas (funções atômicas)", () => {
     ).rejects.toThrow(/permission denied/i);
   });
 });
+
+describe("exclusão real de conta (LGPD)", () => {
+  it("apagar auth.users apaga em cascata profiles/instruments/subscriptions/trades/screen_time_logs", async () => {
+    const trader = await createTestUser("delete-me@example.com");
+
+    await asUser(trader, (c) =>
+      c.query(
+        `insert into public.trades
+           (user_id, traded_at, account_balance, entry_price, stop_price, lot_size, exit_type, result_total, pip_value)
+         values ($1, now(), 10000, 2345.60, 2343.10, 0.10, 'loss', -50, 0.10)`,
+        [trader],
+      ),
+    );
+    await asUser(trader, (c) =>
+      c.query("insert into public.screen_time_logs (user_id, logged_date, hours) values ($1, current_date, 1)", [
+        trader,
+      ]),
+    );
+
+    await asServiceRole((c) => c.query("delete from auth.users where id = $1", [trader]));
+
+    const remaining = await withFixtureSetup(async (c) => ({
+      profiles: await c.query("select 1 from public.profiles where id = $1", [trader]),
+      instruments: await c.query("select 1 from public.instruments where user_id = $1", [trader]),
+      subscriptions: await c.query("select 1 from public.subscriptions where user_id = $1", [trader]),
+      trades: await c.query("select 1 from public.trades where user_id = $1", [trader]),
+      screenTimeLogs: await c.query("select 1 from public.screen_time_logs where user_id = $1", [trader]),
+    }));
+
+    expect(remaining.profiles.rows).toHaveLength(0);
+    expect(remaining.instruments.rows).toHaveLength(0);
+    expect(remaining.subscriptions.rows).toHaveLength(0);
+    expect(remaining.trades.rows).toHaveLength(0);
+    expect(remaining.screenTimeLogs.rows).toHaveLength(0);
+  });
+
+  it("audit_log da exclusão sobrevive, mas com user_id/actor_id zerados (rastro sem PII vinculada)", async () => {
+    const trader = await createTestUser("delete-me-audit@example.com");
+
+    const inserted = await asServiceRole((c) =>
+      c.query(
+        "insert into public.audit_log (actor_id, user_id, action, metadata) values ($1, $1, 'account_deleted', '{}'::jsonb) returning id",
+        [trader],
+      ),
+    );
+    const auditId = inserted.rows[0].id;
+
+    await asServiceRole((c) => c.query("delete from auth.users where id = $1", [trader]));
+
+    const audit = await withFixtureSetup((c) =>
+      c.query("select actor_id, user_id, action from public.audit_log where id = $1", [auditId]),
+    );
+    expect(audit.rows).toHaveLength(1);
+    expect(audit.rows[0].action).toBe("account_deleted");
+    expect(audit.rows[0].actor_id).toBeNull();
+    expect(audit.rows[0].user_id).toBeNull();
+  });
+});
