@@ -33,6 +33,17 @@ para `postgres://postgres:postgres@127.0.0.1:5432/trade_app_test` — configure
 todas as migrations em `supabase/migrations/`, recriando o schema do zero a cada execução
 — não rode contra um banco com dados que você queira preservar.
 
+## CI
+
+`.github/workflows/ci.yml` roda em todo push/PR: os 4 verificadores (com um Postgres de
+serviço para os testes de RLS), `pnpm audit` (SCA), CodeQL (SAST) e gitleaks (secrets
+scanning) — ver Seção 9.11 e `docs/SECURITY.md`.
+
+## Documentos de segurança e privacidade
+
+`docs/SECURITY.md` (controles mapeados ao OWASP Top 10), `docs/PRIVACY.md` e
+`docs/TERMS.md` (rascunhos técnicos, pendentes de revisão jurídica antes de publicar).
+
 ## Estrutura
 
 Veja a Seção 0.5 do prompt de criação do projeto (arquitetura travada com o cliente) para
