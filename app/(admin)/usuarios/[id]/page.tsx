@@ -3,7 +3,13 @@ import { Card, Input, Label } from "@/components/ui";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { getUserForAdmin } from "@/lib/admin/users";
 import { PLAN_LABELS, SUBSCRIPTION_STATUS_LABELS } from "@/lib/subscriptions/labels";
-import { extendTrialAction, grantCompAction, setSuspendedAction } from "./actions";
+import {
+  adminResendVerificationAction,
+  extendTrialAction,
+  forcePasswordResetAction,
+  grantCompAction,
+  setSuspendedAction,
+} from "./actions";
 
 export const metadata = { title: "Detalhe do usuário — Admin" };
 
@@ -111,6 +117,30 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
               {user.isSuspended ? "Reativar acesso" : "Suspender acesso"}
             </ConfirmSubmitButton>
           </form>
+
+          {user.email ? (
+            <div className="flex flex-wrap gap-3 border-t border-white/5 pt-5">
+              <form action={forcePasswordResetAction.bind(null, user.id, user.email)}>
+                <ConfirmSubmitButton
+                  variant="ghost"
+                  confirmMessage={`Enviar e-mail de redefinição de senha para ${user.email}?`}
+                >
+                  Forçar redefinição de senha
+                </ConfirmSubmitButton>
+              </form>
+
+              {!user.emailConfirmed ? (
+                <form action={adminResendVerificationAction.bind(null, user.id, user.email)}>
+                  <ConfirmSubmitButton
+                    variant="ghost"
+                    confirmMessage={`Reenviar e-mail de verificação para ${user.email}?`}
+                  >
+                    Reenviar verificação
+                  </ConfirmSubmitButton>
+                </form>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </Card>
     </div>
