@@ -39,10 +39,12 @@ todas as migrations em `supabase/migrations/`, recriando o schema do zero a cada
 serviço para os testes de RLS), `pnpm audit` (SCA), CodeQL (SAST) e gitleaks (secrets
 scanning) — ver Seção 9.11 e `docs/SECURITY.md`.
 
-## Documentos de segurança e privacidade
+## Documentos de segurança, privacidade e operação
 
 `docs/SECURITY.md` (controles mapeados ao OWASP Top 10), `docs/PRIVACY.md` e
-`docs/TERMS.md` (rascunhos técnicos, pendentes de revisão jurídica antes de publicar).
+`docs/TERMS.md` (rascunhos técnicos, pendentes de revisão jurídica antes de publicar),
+`docs/BACKUPS.md` (estratégia de backup) e `RUNBOOK.md` (operação: deploy, promover
+admin, rotação de segredos, limitações conhecidas).
 
 ## Estrutura
 

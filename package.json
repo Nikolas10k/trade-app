@@ -8,9 +8,11 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "bootstrap-admin": "tsx scripts/bootstrap-admin.ts"
   },
   "dependencies": {
+    "@sentry/nextjs": "^10.75.1",
     "@supabase/ssr": "^0.12.6",
     "@supabase/supabase-js": "^2.115.0",
     "decimal.js": "^10.6.0",

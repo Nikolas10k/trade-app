@@ -32,7 +32,7 @@ documento descreve o estado real do sistema, não um objetivo aspiracional.
   API (`supabase/migrations/20260907000000_admin_write_functions.sql`).
 - **Sem caminho de auto-promoção a admin**: `app_admins` não tem nenhuma
   policy de RLS e nenhum grant a `anon`/`authenticated` — só é gravável pelo
-  bootstrap fora da aplicação (ver `RUNBOOK.md`).
+  bootstrap fora da aplicação (ver [`RUNBOOK.md`](../RUNBOOK.md)).
 
 ## A02:2021 — Cryptographic Failures
 
@@ -142,9 +142,16 @@ documento descreve o estado real do sistema, não um objetivo aspiracional.
   que possam ficar inconsistentes entre si.
 - `audit_log` nunca guarda payload de pagamento nem dado de cartão — só
   identificadores e o novo estado.
-- **Lacuna conhecida**: rastreamento de erro (Sentry) ainda não está
-  conectado — `SENTRY_DSN` existe em `.env.example` mas a integração é
-  pendência da Fase 9 (go-live).
+- **Rastreamento de erro (Sentry)**: `instrumentation.ts` +
+  `sentry.server.config.ts`/`sentry.edge.config.ts` inicializam o Sentry no
+  servidor (server actions, route handlers, o `proxy.ts` no runtime edge)
+  automaticamente quando `SENTRY_DSN` está definido — sem DSN, é um no-op
+  completo (nenhuma chamada de rede). `sendDefaultPii: false` — nenhum
+  payload de trade/checklist é enviado, só stack trace e contexto de
+  request. **Lacuna conhecida**: captura de erro no navegador (client-side)
+  não está incluída nesta rodada — exigiria expor o DSN publicamente
+  (`NEXT_PUBLIC_SENTRY_DSN`), decisão que fica para quando o Sentry
+  realmente for conectado (ver `RUNBOOK.md`).
 
 ## A10:2021 — Server-Side Request Forgery (SSRF)
 
