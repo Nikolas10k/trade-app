@@ -1,4 +1,5 @@
 import "server-only";
+import type { User } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/db/supabase-admin";
 import { createClient } from "@/lib/db/supabase-server";
 
@@ -22,22 +23,41 @@ export type AdminUserRow = {
  * *_select_admin (Fase 1) já dão a um admin autenticado leitura dessas
  * tabelas sem precisar de service role — menor privilégio (0.2).
  */
+const AUTH_USERS_PAGE_SIZE = 200;
+
+/**
+ * listUsers é paginada (page/perPage) — uma chamada só devolve no máximo
+ * perPage usuários. Sem esse loop, qualquer conta além da primeira página
+ * some silenciosamente da lista/KPIs do admin (sem erro, sem aviso).
+ * `nextPage` vem null na última página.
+ */
+export async function listAllAuthUsers(admin: ReturnType<typeof createAdminClient>): Promise<User[]> {
+  const users: User[] = [];
+  let page: number | undefined = 1;
+  while (page) {
+    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: AUTH_USERS_PAGE_SIZE });
+    if (error) throw error;
+    users.push(...data.users);
+    page = data.nextPage ?? undefined;
+  }
+  return users;
+}
+
 /** Todos os usuários — sem filtro, para que a tela de admin possa derivar tanto a tabela (filtrada por busca) quanto os KPIs (sobre o total) da mesma leitura. */
 export async function listUsersForAdmin(): Promise<AdminUserRow[]> {
   const admin = createAdminClient();
   const supabase = await createClient();
 
-  const [{ data: authData, error: authError }, { data: subscriptions }, { data: profiles }] = await Promise.all([
-    admin.auth.admin.listUsers({ perPage: 200 }),
+  const [authUsers, { data: subscriptions }, { data: profiles }] = await Promise.all([
+    listAllAuthUsers(admin),
     supabase.from("subscriptions").select("user_id, status, plan, trial_ends_at, current_period_end, comp_until"),
     supabase.from("profiles").select("id, is_suspended"),
   ]);
-  if (authError) throw authError;
 
   const subsByUser = new Map((subscriptions ?? []).map((s) => [s.user_id, s]));
   const suspendedByUser = new Map((profiles ?? []).map((p) => [p.id, p.is_suspended]));
 
-  return authData.users.map((u): AdminUserRow => {
+  return authUsers.map((u): AdminUserRow => {
     const sub = subsByUser.get(u.id);
     return {
       id: u.id,
