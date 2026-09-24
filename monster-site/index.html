@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monster Alto-Falantes</title>
+<meta name="description" content="Monster Alto-Falantes — subwoofers e médios feitos para quem sente o som no peito.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Italiana&family=Outfit:wght@300;400;600&family=Playfair+Display:ital,wght@1,500&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+
+html, body {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #000000;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+body {
+    min-height: 900vh;
+    font-family: 'Outfit', sans-serif;
+    color: #ffffff;
+    overflow-x: hidden;
+    cursor: none;
+}
+
+* { cursor: none !important; }
+
+::-webkit-scrollbar { display: none; width: 0; }
+
+#webgl {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 1;
+    outline: none;
+}
+
+/* ---------- Custom cursor ---------- */
+.cursor-inner {
+    position: fixed; top: 0; left: 0;
+    width: 6px; height: 6px;
+    border: 2px solid rgba(255, 255, 255, 1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 9999;
+}
+.cursor-outer {
+    position: fixed; top: 0; left: 0;
+    width: 40px; height: 40px;
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 9998;
+    transition: width 0.3s, height 0.3s, background 0.3s;
+}
+
+/* ---------- Overlay layer ---------- */
+.cinematic-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 10;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0 60px 40px 60px;
+    box-sizing: border-box;
+}
+
+/* ---------- Header ---------- */
+.main-header {
+    display: flex; justify-content: space-between; align-items: center;
+    width: 100%; z-index: 20;
+    pointer-events: auto;
+    padding: 20px 0;
+}
+.brand {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 14px; font-weight: 600; letter-spacing: 5px; text-transform: uppercase;
+}
+.brand-mark { width: 22px; height: 22px; }
+.brand small {
+    font-size: 9px; font-weight: 300; letter-spacing: 3px; color: rgba(255,255,255,0.55);
+}
+.header-nav { display: flex; align-items: center; gap: 24px; }
+.nav-link {
+    color: #ffffff; text-decoration: none;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+    font-weight: 500; transition: color 0.3s;
+}
+.nav-link:hover { color: #ffffff; }
+.nav-dot { width: 3px; height: 3px; background: rgba(255, 255, 255, 0.2); border-radius: 50%; }
+.contact-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 24px;
+    background: #ffffff; color: #000000;
+    text-decoration: none;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;
+    border-radius: 20px;
+    transition: transform 0.3s, background 0.3s;
+}
+.btn-circle {
+    display: inline-block; width: 6px; height: 6px;
+    border: 1px solid #000000; border-radius: 50%; background: transparent;
+}
+.contact-btn:hover { transform: scale(1.05); background: #f0f0f0; }
+
+/* ---------- Slides ---------- */
+.slide { position: absolute; bottom: 12%; pointer-events: none; }
+
+#slide-1 { left: 0; width: 100%; }
+#slide-1 .slide-title { margin-left: 60px; }
+#slide-1 .desc-row { position: relative; display: flex; width: 100%; }
+#slide-1 .col-1 {
+    margin-left: 60px;
+    width: calc(25vw - 60px);
+    max-width: calc(25vw - 60px);
+}
+#slide-1 .col-2 {
+    position: absolute;
+    left: calc(25vw + 40px);
+    width: calc(25vw - 60px);
+    max-width: calc(25vw - 60px);
+}
+
+#slide-2 { left: 0; width: 100%; }
+
+/* media masks (editorial image / video reveals) */
+.media-mask {
+    position: fixed;
+    top: 90px;
+    width: calc(25vw - 60px);
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    z-index: 2;
+    pointer-events: none;
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 1.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease;
+    opacity: 0;
+}
+.media-mask img, .media-mask video {
+    display: block;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transform: scale(1.15);
+    transition: transform 1.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.media-mask.active { clip-path: inset(0 0 0 0); opacity: 1; }
+.media-mask.active img, .media-mask.active video { transform: scale(1); }
+.media-caption {
+    position: absolute; left: 14px; bottom: 12px;
+    font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+    color: rgba(255,255,255,0.8);
+    text-shadow: 0 1px 8px rgba(0,0,0,0.8);
+}
+
+#slide-2-img { left: 60px; }
+#slide-3-img { right: 60px; }
+#slide-4-media { left: 60px; aspect-ratio: 3 / 4; }
+
+#slide-2 .slide-title { margin-left: calc(25vw + 40px); }
+#slide-2 .slide-desc {
+    margin-left: calc(50vw + 20px);
+    width: calc(25vw - 60px);
+    max-width: calc(25vw - 60px);
+}
+
+#slide-3 {
+    left: calc(50vw + 20px);
+    width: calc(25vw - 60px);
+    max-width: calc(25vw - 60px);
+}
+#slide-3 .slide-title { white-space: nowrap; }
+
+#slide-4 { left: calc(25% + 40px); max-width: 600px; }
+
+.slide-title {
+    font-family: 'Italiana', serif;
+    font-size: 116px;
+    line-height: 1.0;
+    font-weight: 400;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    color: #f7f0ff;
+}
+.slide-desc {
+    font-size: 16px; line-height: 1.7; font-weight: 300;
+    color: #d1d5db; letter-spacing: 0.5px;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+    transition-delay: 0.4s;
+}
+.slide.active .slide-desc { opacity: 1; transform: translateY(0); }
+
+.slide-title .char {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(50px);
+    filter: blur(12px);
+    transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                transform 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                filter 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.slide.active .slide-title .char { opacity: 1; transform: translateY(0); filter: blur(0); }
+.slide.active { pointer-events: auto; }
+
+/* ---------- Grid overlay ---------- */
+.story-dashes {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex; flex-direction: column; gap: 12px;
+}
+.story-dash { width: 2px; height: 40px; background: rgba(255, 255, 255, 0.15); border-radius: 2px; }
+.story-dash-fill { width: 100%; height: 0%; background: #ffffff; border-radius: 2px; }
+
+.grid-horizontal-line {
+    position: fixed; top: 70px; left: 0; right: 0;
+    width: 100%; height: 1px;
+    background: rgba(255, 255, 255, 0.12);
+    z-index: 5; pointer-events: none;
+}
+.grid-lines {
+    position: fixed; top: 0; left: 40px; right: 40px;
+    width: calc(100% - 80px); height: 100vh;
+    display: flex; justify-content: space-between;
+    z-index: 5; pointer-events: none;
+}
+.grid-line {
+    position: relative; width: 1px; height: 100%;
+    background: rgba(255, 255, 255, 0.12);
+}
+.grid-line:nth-child(3) { margin-top: 70px; height: calc(100vh - 70px); }
+.grid-dot {
+    position: absolute; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255, 255, 255, 0.35);
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.15);
+}
+
+/* ---------- Small screens ---------- */
+@media (max-width: 820px) {
+    .cinematic-container { padding: 0 20px 30px 20px; }
+    .header-nav { display: none; }
+    .slide-title { font-size: 58px; }
+    #slide-1 .slide-title, #slide-2 .slide-title { margin-left: 20px; }
+    #slide-1 .col-1, #slide-2 .slide-desc {
+        margin-left: 20px; width: calc(100vw - 40px); max-width: calc(100vw - 40px);
+    }
+    #slide-1 .col-2 { display: none; }
+    #slide-3, #slide-4 { left: 20px; width: calc(100vw - 40px); max-width: calc(100vw - 40px); }
+    .media-mask { width: 42vw; }
+    #slide-2-img, #slide-4-media { left: 20px; }
+    #slide-3-img { right: 20px; }
+    .cursor-inner, .cursor-outer { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor-inner"></div>
+<div class="cursor-outer"></div>
+
+<div class="cinematic-container">
+    <div class="main-header">
+        <div class="brand">
+            <svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+                <rect x="8" y="8" width="24" height="24" transform="rotate(45 20 20)" stroke="#d24a8c" stroke-width="2.4"/>
+                <rect x="11" y="11" width="18" height="18" transform="rotate(28 20 20)" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.2"/>
+                <path d="M13.5 25V15l6.5 6.5 6.5-6.5v10" stroke="#ffffff" stroke-width="2" stroke-linejoin="round"/>
+            </svg>
+            <span>Monster <small>Alto-Falantes</small></span>
+        </div>
+        <nav class="header-nav">
+            <a href="#slide-1" class="nav-link">Grave</a>
+            <span class="nav-dot"></span>
+            <a href="#slide-2" class="nav-link">Subwoofer</a>
+            <span class="nav-dot"></span>
+            <a href="#slide-3" class="nav-link">Médio</a>
+            <span class="nav-dot"></span>
+            <a href="#slide-4" class="nav-link">Nação</a>
+        </nav>
+        <div class="header-actions">
+            <a href="#" class="contact-btn">Contato <span class="btn-circle"></span></a>
+        </div>
+    </div>
+
+    <div class="slide" id="slide-1">
+        <h2 class="slide-title">Pressão <br>e Grave</h2>
+        <div class="desc-row">
+            <p class="slide-desc col-1">Alto-falantes feitos para quem sente o som no peito. Cada cone, cada bobina e cada suspensão pensados para mover ar com força e precisão.</p>
+            <p class="slide-desc col-2">Nascida na cultura do som automotivo brasileiro, a Monster transforma potência bruta em grave limpo, firme e controlado — do porta-malas ao palco.</p>
+        </div>
+    </div>
+
+    <div class="slide" id="slide-2">
+        <h2 class="slide-title">Força <br>Bruta</h2>
+        <p class="slide-desc">Suspensão de alta excursão, carcaça reforçada e conjunto magnético robusto. Construído para aguentar horas de pressão sem perder o controle.</p>
+    </div>
+
+    <div class="slide" id="slide-3">
+        <h2 class="slide-title">Médio Grave</h2>
+        <p class="slide-desc">Voz presente, kick seco e definição em alto volume. Médios com ogiva e cone tratado para atravessar a mistura com clareza e peso.</p>
+    </div>
+
+    <div class="slide" id="slide-4">
+        <h2 class="slide-title">Nação <br>Monster</h2>
+        <p class="slide-desc">Das ruas para os encontros: carros, pessoas e paixão pelo som. Monster Alto-Falantes — o grave que você não só escuta, você sente.</p>
+    </div>
+</div>
+
+<div class="media-mask" id="slide-2-img">
+    <img src="assets/subwoofer.jpg" alt="Subwoofer Monster">
+    <span class="media-caption">Subwoofer</span>
+</div>
+<div class="media-mask" id="slide-3-img">
+    <img src="assets/monster-pro.jpg" alt="Médio grave Monster">
+    <span class="media-caption">Médio grave</span>
+</div>
+<div class="media-mask" id="slide-4-media">
+    <video src="assets/polo.mp4" poster="assets/polo-poster.jpg" muted loop playsinline preload="metadata"></video>
+    <span class="media-caption">Nação Monster</span>
+</div>
+
+<div class="grid-horizontal-line"></div>
+<div class="grid-lines">
+    <div class="grid-line"><div class="grid-dot top"></div><div class="grid-dot bottom"></div></div>
+    <div class="grid-line"><div class="grid-dot top"></div><div class="grid-dot bottom"></div></div>
+    <div class="grid-line"><div class="grid-dot top"></div><div class="grid-dot bottom"></div></div>
+    <div class="grid-line"><div class="grid-dot top"></div><div class="grid-dot bottom"></div></div>
+    <div class="grid-line story-progress-container">
+        <div class="grid-dot top"></div>
+        <div class="grid-dot bottom"></div>
+        <div class="story-dashes">
+            <div class="story-dash"><div class="story-dash-fill" id="dash-fill-1"></div></div>
+            <div class="story-dash"><div class="story-dash-fill" id="dash-fill-2"></div></div>
+            <div class="story-dash"><div class="story-dash-fill" id="dash-fill-3"></div></div>
+            <div class="story-dash"><div class="story-dash-fill" id="dash-fill-4"></div></div>
+        </div>
+    </div>
+</div>
+
+<canvas id="webgl"></canvas>
+
+<script type="importmap">
+{
+    "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/examples/jsm/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+
+const canvas = document.querySelector('#webgl');
+let scene, camera, renderer;
+let speakerModel;  // the subwoofer
+let modelPivot;    // pivot group for perfect center-rotation
+let conePiston;    // moving parts of the speaker (cone, dust cap, spider)
+let surroundMesh;
+const clock = new THREE.Clock();
+let currentScroll = 0;
+
+let mouseX = 0, mouseY = 0, targetMouseX = 0, targetMouseY = 0;
+
+let cursorX = window.innerWidth / 2,  cursorY = window.innerHeight / 2;
+let outerCursorX = window.innerWidth / 2, outerCursorY = window.innerHeight / 2;
+
+let bgMaterial;
+const shaderUniforms = {
+    uTime: { value: 0 },
+    uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+    uMouse: { value: new THREE.Vector2(0, 0) },
+    uScroll: { value: 0 }
+};
+
+let sparkParticles;
+const sparkCount = 450;
+const sparkData = [];
+
+const sizes = { width: window.innerWidth, height: window.innerHeight };
+
+// Brand accents
+const BRAND_MAGENTA = '#d24a8c';
+const BRAND_PLUM = '#7d2a66';
+
+/* ------------------------------------------------------------------ */
+/*  Background wave shader: brand magenta/plum → deep sapphire        */
+/* ------------------------------------------------------------------ */
+function createBackgroundShader() {
+    const vertexShader = `
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `;
+
+    const fragmentShader = `
+        varying vec2 vUv;
+        uniform float uTime;
+        uniform vec2 uResolution;
+        uniform vec2 uMouse;
+        uniform float uScroll;
+
+        float hash(float n) { return fract(sin(n) * 43758.5453123); }
+        float noise(in vec3 x) {
+            vec3 p = floor(x);
+            vec3 f = fract(x);
+            f = f*f*(3.0-2.0*f);
+            float n = p.x + p.y*57.0 + 113.0*p.z;
+            return mix(mix(mix(hash(n+  0.0), hash(n+  1.0), f.x),
+                           mix(hash(n+ 57.0), hash(n+ 58.0), f.x), f.y),
+                       mix(mix(hash(n+113.0), hash(n+114.0), f.x),
+                           mix(hash(n+170.0), hash(n+171.0), f.x), f.y), f.z);
+        }
+
+        void main() {
+            vec2 uv = (gl_FragCoord.xy - 0.5 * uResolution.xy) / uResolution.y;
+            float aspect = uResolution.x / uResolution.y;
+
+            float time = uTime * 0.08;
+            float scroll = uScroll;
+
+            float angle1 = 0.6;
+            float angle2 = -0.7;
+            float angle3 = 1.2;
+
+            float freq1 = 2.4;
+            float freq2 = 3.2;
+            float freq3 = 4.0;
+
+            vec2 warpedUv = uv;
+            float scrollDeform = scroll * 5.0;
+
+            warpedUv.x += sin(uv.y * 2.5 + time * 0.2 + scrollDeform) * 0.35;
+            warpedUv.y += cos(uv.x * 2.5 - time * 0.15 - scrollDeform * 0.8) * 0.35;
+
+            warpedUv.x += sin(uv.y * 1.2 - time * 0.1 - scrollDeform * 1.5) * 0.25;
+            warpedUv.y += cos(uv.x * 1.2 + time * 0.18 + scrollDeform * 1.2) * 0.25;
+
+            vec2 scrollDrift = vec2(scroll * 0.04, -scroll * 0.02);
+            vec2 mouseShift = vec2(uMouse.x * aspect * 0.05, uMouse.y * 0.05);
+            warpedUv += scrollDrift + mouseShift;
+
+            vec2 dir1 = vec2(cos(angle1), sin(angle1));
+            vec2 dir2 = vec2(cos(angle2), sin(angle2));
+            vec2 dir3 = vec2(cos(angle3), sin(angle3));
+
+            float w1 = sin(dot(warpedUv, dir1) * freq1 + time * 1.0);
+            float w2 = cos(dot(warpedUv, dir2) * freq2 - time * 1.4 + w1 * 0.4);
+            float w3 = sin(dot(warpedUv, dir3) * freq3 + time * 1.8 + w2 * 0.5);
+
+            float waveField = w1 * 0.50 + w2 * 0.35 + w3 * 0.15;
+
+            float wideSheen = pow(max(0.0, 1.0 - abs(waveField - 0.1)), 2.5);
+            float crispSpecular = pow(max(0.0, 1.0 - abs(waveField - 0.15)), 8.0);
+            float crest = wideSheen * 0.5 + crispSpecular * 0.9;
+
+            // Top palette (scroll = 0): Monster magenta / plum
+            vec3 c0_shadow = vec3(0.0010, 0.0004, 0.0008);
+            vec3 c0_wave1  = vec3(0.062, 0.014, 0.042);
+            vec3 c0_wave2  = vec3(0.034, 0.008, 0.024);
+            vec3 c0_crest  = vec3(0.30, 0.10, 0.23);
+
+            // Bottom palette (scroll = 1): deep sapphire (the studio-blue of the product shots)
+            vec3 c1_shadow = vec3(0.0004, 0.0006, 0.0012);
+            vec3 c1_wave1  = vec3(0.015, 0.035, 0.065);
+            vec3 c1_wave2  = vec3(0.008, 0.020, 0.045);
+            vec3 c1_crest  = vec3(0.18, 0.35, 0.55);
+
+            float t = smoothstep(0.0, 1.0, scroll);
+            vec3 colShadow = mix(c0_shadow, c1_shadow, t);
+            vec3 colWave1  = mix(c0_wave1, c1_wave1, t);
+            vec3 colWave2  = mix(c0_wave2, c1_wave2, t);
+            vec3 colCrest  = mix(c0_crest, c1_crest, t);
+
+            vec3 color = colShadow;
+            color = mix(color, colWave2, smoothstep(-0.6, 0.2, waveField));
+            color = mix(color, colWave1, smoothstep(0.0, 0.8, waveField));
+            color += colCrest * crest * 1.4;
+
+            float vignette = 1.0 - dot(uv, uv) * 0.12;
+            color *= vignette;
+
+            gl_FragColor = vec4(color, 1.0);
+        }
+    `;
+
+    bgMaterial = new THREE.ShaderMaterial({
+        vertexShader,
+        fragmentShader,
+        uniforms: shaderUniforms,
+        depthWrite: false,
+        depthTest: false
+    });
+
+    const bgMesh = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), bgMaterial);
+    bgMesh.position.set(0.0, 0.0, -8.0);
+    bgMesh.renderOrder = -10;
+    camera.add(bgMesh);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Sparks                                                             */
+/* ------------------------------------------------------------------ */
+function createSparkTexture() {
+    const c = document.createElement('canvas');
+    c.width = 16; c.height = 16;
+    const ctx = c.getContext('2d');
+    const gradient = ctx.createRadialGradient(8, 8, 0, 8, 8, 8);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    gradient.addColorStop(0.25, 'rgba(255, 255, 255, 0.85)');
+    gradient.addColorStop(0.6, 'rgba(255, 255, 255, 0.3)');
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 16, 16);
+    return new THREE.CanvasTexture(c);
+}
+
+function createSparks() {
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(sparkCount * 3);
+    const colors = new Float32Array(sparkCount * 3);
+
+    for (let i = 0; i < sparkCount; i++) {
+        positions[i * 3]     = (Math.random() - 0.5) * 6.5;
+        positions[i * 3 + 1] = (Math.random() - 0.5) * 5.0 - 0.5;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 6.5;
+
+        if (Math.random() < 0.6) {
+            // brand magenta-pink
+            colors[i * 3]     = 1.0;
+            colors[i * 3 + 1] = 0.22 + Math.random() * 0.15;
+            colors[i * 3 + 2] = 0.55 + Math.random() * 0.2;
+        } else {
+            // icy blue (matches rim light)
+            colors[i * 3]     = 0.55 + Math.random() * 0.15;
+            colors[i * 3 + 1] = 0.82 + Math.random() * 0.12;
+            colors[i * 3 + 2] = 1.0;
+        }
+
+        sparkData.push({
+            speedX: (Math.random() - 0.5) * 0.4,
+            speedY: 0.15 + Math.random() * 0.3,
+            speedZ: (Math.random() - 0.5) * 0.4,
+            swaySpeed: 0.5 + Math.random() * 1.5,
+            swayRadius: 0.05 + Math.random() * 0.15,
+            phase: Math.random() * Math.PI * 2
+        });
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    const material = new THREE.PointsMaterial({
+        size: 0.025,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.85,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        map: createSparkTexture()
+    });
+
+    sparkParticles = new THREE.Points(geometry, material);
+    scene.add(sparkParticles);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Procedural subwoofer                                               */
+/* ------------------------------------------------------------------ */
+function createNoiseTexture(size = 256) {
+    const c = document.createElement('canvas');
+    c.width = c.height = size;
+    const ctx = c.getContext('2d');
+    const img = ctx.createImageData(size, size);
+    for (let i = 0; i < img.data.length; i += 4) {
+        const v = 110 + Math.random() * 145;
+        img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+        img.data[i + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(6, 3);
+    return tex;
+}
+
+// Dust-cap badge: twisted diamonds + "M" (brand emblem)
+function createLogoTexture() {
+    const s = 512;
+    const c = document.createElement('canvas');
+    c.width = c.height = s;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#0b0b0e';
+    ctx.fillRect(0, 0, s, s);
+    ctx.translate(s / 2, s / 2);
+
+    const grad = ctx.createLinearGradient(-150, -150, 150, 150);
+    grad.addColorStop(0, BRAND_MAGENTA);
+    grad.addColorStop(1, BRAND_PLUM);
+
+    ctx.save();
+    ctx.rotate(Math.PI / 4);
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 22;
+    ctx.strokeRect(-120, -120, 240, 240);
+    ctx.restore();
+
+    ctx.save();
+    ctx.rotate(Math.PI / 4 + 0.32);
+    ctx.strokeStyle = 'rgba(210, 74, 140, 0.55)';
+    ctx.lineWidth = 8;
+    ctx.strokeRect(-92, -92, 184, 184);
+    ctx.restore();
+
+    ctx.fillStyle = '#e6d6dc';
+    ctx.font = '600 130px Outfit, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('M', 0, 8);
+
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 16;
+    return tex;
+}
+
+// Silver "MONSTER" lettering around the top of the flange
+function createFlangeTextTexture() {
+    const s = 1024;
+    const c = document.createElement('canvas');
+    c.width = c.height = s;
+    const ctx = c.getContext('2d');
+    const text = 'MONSTER';
+    const R = 0.935 * s / 2;
+    const spread = 0.62;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '600 44px Outfit, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    for (let i = 0; i < text.length; i++) {
+        const a = Math.PI / 2 + spread / 2 - (i / (text.length - 1)) * spread;
+        ctx.save();
+        ctx.translate(s / 2 + R * Math.cos(a), s / 2 - R * Math.sin(a));
+        ctx.rotate(Math.PI / 2 - a);
+        ctx.fillText(text[i], 0, 0);
+        ctx.restore();
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 16;
+    return tex;
+}
+
+// LatheGeometry revolves around Y; rotate so the profile's Y becomes world Z (speaker axis).
+function lathe(points, material, segments = 128) {
+    const geo = new THREE.LatheGeometry(points.map(([r, z]) => new THREE.Vector2(r, z)), segments);
+    const mesh = new THREE.Mesh(geo, material);
+    mesh.rotation.x = Math.PI / 2;
+    return mesh;
+}
+
+function buildSpeaker() {
+    const speaker = new THREE.Group();
+    const noise = createNoiseTexture();
+
+    const mats = {
+        frame:   new THREE.MeshStandardMaterial({ color: 0x17171b, roughness: 0.42, metalness: 0.92 }),
+        rubber:  new THREE.MeshStandardMaterial({ color: 0x0e0e11, roughness: 0.6, metalness: 0.2, bumpMap: noise, bumpScale: 0.4, side: THREE.DoubleSide }),
+        cone:    new THREE.MeshStandardMaterial({ color: 0x08080a, roughness: 0.85, metalness: 0.1, bumpMap: noise, bumpScale: 0.8, side: THREE.DoubleSide }),
+        spider:  new THREE.MeshStandardMaterial({ color: 0x2d2621, roughness: 0.9, metalness: 0.0, side: THREE.DoubleSide }),
+        boot:    new THREE.MeshStandardMaterial({ color: 0x070709, roughness: 0.8, metalness: 0.3, bumpMap: noise, bumpScale: 0.5, side: THREE.DoubleSide }),
+        steel:   new THREE.MeshStandardMaterial({ color: 0x9a9ca4, roughness: 0.25, metalness: 1.0 }),
+        red:     new THREE.MeshStandardMaterial({ color: 0xb3122a, roughness: 0.35, metalness: 0.4 }),
+    };
+
+    // --- Front flange with 8 bolt holes ---
+    const shape = new THREE.Shape();
+    shape.absarc(0, 0, 1.0, 0, Math.PI * 2, false);
+    const inner = new THREE.Path();
+    inner.absarc(0, 0, 0.86, 0, Math.PI * 2, true);
+    shape.holes.push(inner);
+    for (let i = 0; i < 8; i++) {
+        const a = Math.PI / 8 + i * Math.PI / 4;
+        const h = new THREE.Path();
+        h.absarc(Math.cos(a) * 0.93, Math.sin(a) * 0.93, 0.02, 0, Math.PI * 2, true);
+        shape.holes.push(h);
+    }
+    const flangeGeo = new THREE.ExtrudeGeometry(shape, {
+        depth: 0.07, bevelEnabled: true, bevelThickness: 0.012, bevelSize: 0.01,
+        bevelSegments: 3, curveSegments: 128
+    });
+    const flange = new THREE.Mesh(flangeGeo, mats.frame);
+    flange.position.z = -0.07;
+    speaker.add(flange);
+
+    const lettering = new THREE.Mesh(
+        new THREE.RingGeometry(0.865, 0.998, 128),
+        new THREE.MeshStandardMaterial({
+            map: createFlangeTextTexture(), color: 0xd8dae0, metalness: 0.8, roughness: 0.3,
+            transparent: true, alphaTest: 0.3, depthWrite: false
+        })
+    );
+    lettering.position.z = 0.0135;
+    speaker.add(lettering);
+
+    // --- Surround (tall rubber roll) ---
+    const surroundPts = [];
+    for (let i = 0; i <= 32; i++) {
+        const t = (i / 32) * Math.PI;
+        surroundPts.push([0.765 + 0.095 * Math.cos(t), 0.14 * Math.sin(t)]);
+    }
+    surroundMesh = lathe(surroundPts, mats.rubber);
+    speaker.add(surroundMesh);
+
+    // --- Moving assembly: cone, dust cap with emblem, spider ---
+    conePiston = new THREE.Group();
+    speaker.add(conePiston);
+
+    const conePts = [];
+    for (let i = 0; i <= 32; i++) {
+        const s = i / 32;
+        conePts.push([0.67 - 0.43 * s, -0.34 * Math.pow(s, 0.75)]);
+    }
+    conePiston.add(lathe(conePts, mats.cone));
+
+    const capPts = [];
+    for (let i = 0; i <= 24; i++) {
+        const r = 0.24 * (1 - i / 24);
+        capPts.push([r, -0.34 + 0.035 * Math.sqrt(1 - (r / 0.24) ** 2)]);
+    }
+    const capMesh = lathe(capPts, null, 96);
+    // planar UVs so the emblem reads straight on the dome
+    const pos = capMesh.geometry.attributes.position;
+    const uv = capMesh.geometry.attributes.uv;
+    for (let i = 0; i < pos.count; i++) {
+        uv.setXY(i, pos.getX(i) / 0.48 + 0.5, -pos.getZ(i) / 0.48 + 0.5);
+    }
+    uv.needsUpdate = true;
+    const logoTex = createLogoTexture();
+    capMesh.material = new THREE.MeshStandardMaterial({
+        map: logoTex, emissiveMap: logoTex, emissive: 0xffffff, emissiveIntensity: 0.18,
+        roughness: 0.6, metalness: 0.2, side: THREE.DoubleSide
+    });
+    conePiston.add(capMesh);
+
+    const spiderPts = [];
+    for (let i = 0; i <= 64; i++) {
+        const r = 0.26 + 0.38 * (i / 64);
+        spiderPts.push([r, -0.44 + 0.012 * Math.sin(r * 70)]);
+    }
+    conePiston.add(lathe(spiderPts, mats.spider));
+
+    // --- Basket: spokes + rings ---
+    const spokeCount = 6;
+    const up = new THREE.Vector3(0, 1, 0);
+    for (let i = 0; i < spokeCount; i++) {
+        const a = (i / spokeCount) * Math.PI * 2 + Math.PI / 6;
+        const p1 = new THREE.Vector3(Math.cos(a) * 0.9, Math.sin(a) * 0.9, -0.06);
+        const p2 = new THREE.Vector3(Math.cos(a) * 0.54, Math.sin(a) * 0.54, -0.56);
+        const dir = p2.clone().sub(p1);
+        const spoke = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, dir.length(), 6), mats.frame);
+        spoke.position.copy(p1).add(p2).multiplyScalar(0.5);
+        spoke.quaternion.setFromUnitVectors(up, dir.normalize());
+        speaker.add(spoke);
+    }
+    const midRing = new THREE.Mesh(new THREE.TorusGeometry(0.72, 0.02, 12, 128), mats.frame);
+    midRing.position.z = -0.31;
+    speaker.add(midRing);
+    const backRing = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.035, 12, 128), mats.frame);
+    backRing.position.z = -0.56;
+    speaker.add(backRing);
+
+    // --- Motor: rubber boot over magnet stack, with a steel seam and pole vent ---
+    speaker.add(lathe([
+        [0.0, -0.56], [0.6, -0.56], [0.65, -0.585], [0.67, -0.63],
+        [0.67, -0.98], [0.65, -1.025], [0.6, -1.05], [0.13, -1.05], [0.11, -1.03], [0.11, -0.9], [0.0, -0.9]
+    ], mats.boot));
+    const seam = new THREE.Mesh(new THREE.TorusGeometry(0.672, 0.012, 10, 128), mats.steel);
+    seam.position.z = -0.7;
+    speaker.add(seam);
+    const topPlate = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.02, 10, 128), mats.steel);
+    topPlate.position.z = -0.575;
+    speaker.add(topPlate);
+
+    // --- Terminals ---
+    const block = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.07, 0.12), mats.boot);
+    block.position.set(0, 0.8, -0.16);
+    speaker.add(block);
+    [[-0.06, mats.red], [0.06, mats.steel]].forEach(([x, m]) => {
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.13, 16), m);
+        post.position.set(x, 0.88, -0.16);
+        speaker.add(post);
+    });
+
+    speaker.traverse((child) => {
+        if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+            child.material.envMapIntensity = child.material.metalness > 0.5 ? 0.45 : 0.12;
+        }
+    });
+    lettering.castShadow = false;
+
+    return speaker;
+}
+
+function loadModel() {
+    speakerModel = buildSpeaker();
+
+    modelPivot = new THREE.Group();
+    scene.add(modelPivot);
+    modelPivot.add(speakerModel);
+
+    // three-quarter view, face turned left like the studio shots
+    speakerModel.rotation.y = -0.55;
+
+    // 1. scale so max dimension = 2.1
+    const boxInitial = new THREE.Box3().setFromObject(speakerModel);
+    const sizeInitial = boxInitial.getSize(new THREE.Vector3());
+    const maxDim = Math.max(sizeInitial.x, sizeInitial.y, sizeInitial.z);
+    speakerModel.scale.setScalar(2.1 / (maxDim > 0.0001 ? maxDim : 1));
+
+    // 2. update world matrix so the box accounts for scale
+    speakerModel.updateMatrixWorld(true);
+
+    // 3–4. recenter so the geometric center sits at the pivot origin
+    const boxScaled = new THREE.Box3().setFromObject(speakerModel);
+    speakerModel.position.sub(boxScaled.getCenter(new THREE.Vector3()));
+
+    // 5. slight drop for a grounded stance
+    modelPivot.position.y = -0.2;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Resize                                                             */
+/* ------------------------------------------------------------------ */
+function onWindowResize() {
+    sizes.width = window.innerWidth;
+    sizes.height = window.innerHeight;
+    camera.aspect = sizes.width / sizes.height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(sizes.width, sizes.height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    if (shaderUniforms) shaderUniforms.uResolution.value.set(sizes.width, sizes.height);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Pointer                                                            */
+/* ------------------------------------------------------------------ */
+const cursorInner = document.querySelector('.cursor-inner');
+const cursorOuter = document.querySelector('.cursor-outer');
+
+window.addEventListener('mousemove', (event) => {
+    cursorX = event.clientX;
+    cursorY = event.clientY;
+    cursorInner.style.left = `${cursorX}px`;
+    cursorInner.style.top = `${cursorY}px`;
+    targetMouseX = (event.clientX / window.innerWidth) * 2 - 1;
+    targetMouseY = (event.clientY / window.innerHeight) * 2 - 1;
+});
+window.addEventListener('resize', () => onWindowResize());
+
+/* ------------------------------------------------------------------ */
+/*  Titles → per-letter spans                                          */
+/* ------------------------------------------------------------------ */
+function splitTitlesIntoChars() {
+    document.querySelectorAll('.slide-title').forEach(title => {
+        const parts = title.innerHTML.split(/(<br\s*\/?>)/i);
+        let newHTML = '';
+        let delayCounter = 0;
+        parts.forEach(part => {
+            if (part.toLowerCase().startsWith('<br')) {
+                newHTML += part;
+            } else {
+                for (const ch of part) {
+                    if (ch === ' ') {
+                        newHTML += ' ';
+                    } else {
+                        newHTML += `<span class="char" style="transition-delay: ${delayCounter * 0.035}s">${ch}</span>`;
+                        delayCounter++;
+                    }
+                }
+            }
+        });
+        title.innerHTML = newHTML;
+    });
+}
+
+/* ------------------------------------------------------------------ */
+/*  Grid dots / slides / nav                                           */
+/* ------------------------------------------------------------------ */
+const gridDots = document.querySelectorAll('.grid-dot');
+function updateGridDots(scroll) {
+    gridDots.forEach((dot, i) => {
+        const startY = (i * 17) % 80 + 10;
+        let speed = 90 + (i * 55) % 180;
+        if (i % 2 === 0) speed = -speed;
+        let y = startY + scroll * speed;
+        y = ((y % 100) + 100) % 100;
+        dot.style.top = `${y}%`;
+    });
+}
+
+const slides = [1, 2, 3, 4].map(i => document.getElementById(`slide-${i}`));
+const dashFills = [1, 2, 3, 4].map(i => document.getElementById(`dash-fill-${i}`));
+const media2 = document.getElementById('slide-2-img');
+const media3 = document.getElementById('slide-3-img');
+const media4 = document.getElementById('slide-4-media');
+const media4Video = media4.querySelector('video');
+
+function updateSlides(scroll) {
+    dashFills.forEach((fill, idx) => {
+        const start = idx * 0.25;
+        const end = (idx + 1) * 0.25;
+        const progress = Math.max(0, Math.min(1, (scroll - start) / (end - start)));
+        fill.style.height = `${progress * 100}%`;
+    });
+
+    const isActive = (val, start, end) => val >= start && val <= end;
+
+    slides[0].classList.toggle('active', isActive(scroll, -0.10, 0.12));
+
+    const active2 = isActive(scroll, 0.28, 0.40);
+    slides[1].classList.toggle('active', active2);
+    media2.classList.toggle('active', active2);
+
+    const active3 = isActive(scroll, 0.56, 0.68);
+    slides[2].classList.toggle('active', active3);
+    media3.classList.toggle('active', active3);
+
+    const active4 = isActive(scroll, 0.84, 1.05);
+    slides[3].classList.toggle('active', active4);
+    if (media4.classList.contains('active') !== active4) {
+        media4.classList.toggle('active', active4);
+        if (active4) media4Video.play().catch(() => {});
+        else media4Video.pause();
+    }
+}
+
+function setupNavigation() {
+    const targetScrolls = [0.0, 0.34, 0.62, 0.94];
+    document.querySelectorAll('.nav-link').forEach((link, index) => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            window.scrollTo({ top: maxScroll * targetScrolls[index], behavior: 'smooth' });
+        });
+    });
+}
+
+/* ------------------------------------------------------------------ */
+/*  Loop                                                               */
+/* ------------------------------------------------------------------ */
+const targetLookAt = new THREE.Vector3();
+const targetPos = new THREE.Vector3();
+
+function animate() {
+    requestAnimationFrame(animate);
+    const deltaTime = Math.min(clock.getDelta(), 0.1);
+    const elapsed = clock.getElapsedTime();
+
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollTop = window.scrollY ?? window.pageYOffset ?? document.documentElement.scrollTop;
+    const targetScroll = maxScroll > 0 ? scrollTop / maxScroll : 0;
+
+    currentScroll += (targetScroll - currentScroll) * 0.025;
+
+    mouseX += (targetMouseX - mouseX) * 0.05;
+    mouseY += (targetMouseY - mouseY) * 0.05;
+
+    outerCursorX += (cursorX - outerCursorX) * 0.2;
+    outerCursorY += (cursorY - outerCursorY) * 0.2;
+    cursorOuter.style.left = `${outerCursorX}px`;
+    cursorOuter.style.top = `${outerCursorY}px`;
+
+    const scrollVelocity = Math.abs(targetScroll - currentScroll);
+
+    if (modelPivot) {
+        modelPivot.rotation.y = mouseX * 0.25;
+        modelPivot.rotation.x = mouseY * 0.15;
+    }
+
+    // bass pump: a kick at ~120 BPM, harder while scrolling fast
+    if (conePiston) {
+        const beat = (elapsed * 2.0) % 1;
+        const kick = Math.exp(-beat * 9.0) * (1.0 + Math.min(scrollVelocity * 25.0, 1.5));
+        const excursion = kick * 0.035;
+        conePiston.position.z = excursion;
+        surroundMesh.scale.y = 1.0 + excursion * 5.0; // lathe local Y = speaker axis
+    }
+
+    if (sparkParticles) {
+        const positions = sparkParticles.geometry.attributes.position.array;
+        const speedMultiplier = 1.0 + scrollVelocity * 9.0;
+        const turbulence = scrollVelocity * 0.8;
+
+        for (let i = 0; i < sparkCount; i++) {
+            const idx = i * 3;
+            const data = sparkData[i];
+            positions[idx]     += data.speedX * deltaTime * speedMultiplier;
+            positions[idx + 1] += data.speedY * deltaTime * speedMultiplier;
+            positions[idx + 2] += data.speedZ * deltaTime * speedMultiplier;
+
+            const currentSway = data.swayRadius * (1.0 + turbulence * 4.0);
+            positions[idx]     += Math.sin(elapsed * data.swaySpeed + data.phase) * currentSway * deltaTime;
+            positions[idx + 2] += Math.cos(elapsed * data.swaySpeed + data.phase) * currentSway * deltaTime;
+
+            if (positions[idx + 1] > 3.0 || Math.abs(positions[idx]) > 3.5 || Math.abs(positions[idx + 2]) > 3.5) {
+                positions[idx + 1] = -2.5;
+                positions[idx]     = (Math.random() - 0.5) * 3.0;
+                positions[idx + 2] = (Math.random() - 0.5) * 3.0;
+            }
+        }
+        sparkParticles.geometry.attributes.position.needsUpdate = true;
+    }
+
+    // camera orbits 360° with scroll
+    const phi = currentScroll * Math.PI * 2.0;
+    const y = 0.35 + Math.sin(currentScroll * Math.PI) * 0.8;
+    const radius = 4.2 - Math.sin(currentScroll * Math.PI) * 0.6;
+
+    const transitionProgress = Math.min(1.0, currentScroll / 0.28);
+    const easeFactor = (Math.cos(transitionProgress * Math.PI) + 1.0) * 0.5;
+    targetLookAt.set(-0.9 * easeFactor, -0.15, 0);
+    targetPos.set(radius * Math.sin(phi), y, radius * Math.cos(phi));
+    camera.position.lerp(targetPos, 0.025);
+    camera.lookAt(targetLookAt);
+
+    shaderUniforms.uTime.value = elapsed;
+    shaderUniforms.uMouse.value.set(mouseX, -mouseY);
+    shaderUniforms.uScroll.value = currentScroll;
+
+    updateSlides(currentScroll);
+    updateGridDots(currentScroll);
+    renderer.render(scene, camera);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Bootstrap                                                          */
+/* ------------------------------------------------------------------ */
+async function init() {
+    splitTitlesIntoChars();
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color('#000000');
+    scene.fog = new THREE.FogExp2('#000000', 0.01);
+
+    camera = new THREE.PerspectiveCamera(50, sizes.width / sizes.height, 0.1, 100);
+    camera.position.set(0, 0.2, 3.0);
+    scene.add(camera);
+
+    createBackgroundShader();
+
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
+    renderer.setSize(sizes.width, sizes.height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 2.2;
+
+    // soft studio reflections for the metal parts
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+
+    // Chiaroscuro lighting
+    scene.add(new THREE.AmbientLight('#ffffff', 0.1));
+
+    const keyLight = new THREE.SpotLight('#ffffff', 18.0);
+    keyLight.position.set(4, 6, 3);
+    keyLight.angle = Math.PI / 4;
+    keyLight.penumbra = 0.9;
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.width = 2048;
+    keyLight.shadow.mapSize.height = 2048;
+    keyLight.shadow.camera.near = 1.0;
+    keyLight.shadow.camera.far = 15;
+    keyLight.shadow.bias = -0.001;
+    scene.add(keyLight);
+
+    const rimLight = new THREE.DirectionalLight('#e3f2ff', 10.0);
+    rimLight.position.set(-5, 3, -4);
+    scene.add(rimLight);
+
+    // brand-tinted kicker so the cone edge picks up magenta
+    const kicker = new THREE.PointLight(BRAND_MAGENTA, 6.0, 8, 2);
+    kicker.position.set(-2.2, -0.6, 2.0);
+    scene.add(kicker);
+
+    const fillLight = new THREE.DirectionalLight('#fff3e6', 0.8);
+    fillLight.position.set(-2, -4, 2);
+    scene.add(fillLight);
+
+    createSparks();
+
+    // canvas-drawn emblem and lettering use Outfit — wait for it (never block on failure)
+    try { await Promise.race([document.fonts.load('600 64px Outfit'), new Promise(r => setTimeout(r, 1500))]); } catch (e) {}
+    loadModel();
+
+    onWindowResize();
+    animate();
+    setupNavigation();
+}
+
+if (document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
+</script>
+</body>
+</html>
