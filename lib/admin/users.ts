@@ -1,5 +1,6 @@
 import "server-only";
 import type { User } from "@supabase/supabase-js";
+import { hasVerifiedTotpFactor } from "@/lib/auth/mfa";
 import { createAdminClient } from "@/lib/db/supabase-admin";
 import { createClient } from "@/lib/db/supabase-server";
 
@@ -16,10 +17,6 @@ export type AdminUserRow = {
   isSuspended: boolean;
   hasTwoFactor: boolean;
 };
-
-function hasVerifiedTotp(user: User): boolean {
-  return user.factors?.some((f) => f.factor_type === "totp" && f.status === "verified") ?? false;
-}
 
 /**
  * E-mail e metadados de conta só existem em auth.users, que não é exposto
@@ -75,7 +72,7 @@ export async function listUsersForAdmin(): Promise<AdminUserRow[]> {
       currentPeriodEnd: sub?.current_period_end ?? null,
       compUntil: sub?.comp_until ?? null,
       isSuspended: suspendedByUser.get(u.id) ?? false,
-      hasTwoFactor: hasVerifiedTotp(u),
+      hasTwoFactor: hasVerifiedTotpFactor(u),
     };
   });
 }
@@ -112,6 +109,6 @@ export async function getUserForAdmin(userId: string): Promise<AdminUserRow | nu
     currentPeriodEnd: subscription?.current_period_end ?? null,
     compUntil: subscription?.comp_until ?? null,
     isSuspended: profile?.is_suspended ?? false,
-    hasTwoFactor: hasVerifiedTotp(authData.user),
+    hasTwoFactor: hasVerifiedTotpFactor(authData.user),
   };
 }

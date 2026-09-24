@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { Button, FieldError, Input, Label } from "@/components/ui";
+import { TurnstileWidget } from "@/components/turnstile-widget";
 import { logInAction, type ActionState } from "@/app/(auth)/actions";
 
 const initialState: ActionState = { ok: false };
@@ -38,6 +39,7 @@ export function LoginForm() {
         <FieldError message={state.fieldErrors?.password} />
       </div>
       {state.message ? <FieldError message={state.message} /> : null}
+      <TurnstileWidget />
       <SubmitButton />
     </form>
   );

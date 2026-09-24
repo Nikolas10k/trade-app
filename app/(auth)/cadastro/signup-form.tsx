@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Button, FieldError, Input, Label } from "@/components/ui";
+import { TurnstileWidget } from "@/components/turnstile-widget";
 import { passwordStrength } from "@/lib/validation/auth";
 import { signUpAction, type ActionState } from "../actions";
 
@@ -91,6 +92,7 @@ export function SignUpForm() {
       </div>
       <FieldError message={state.fieldErrors?.consent} />
       {state.message ? <FieldError message={state.message} /> : null}
+      <TurnstileWidget />
       <SubmitButton />
     </form>
   );

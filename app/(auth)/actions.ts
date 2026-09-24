@@ -32,6 +32,8 @@ export async function signUpAction(_prev: ActionState, formData: FormData): Prom
     return { ok: false, fieldErrors: fieldErrorsFromZod(parsed.error) };
   }
 
+  const captchaToken = formData.get("cf-turnstile-response");
+
   const supabase = await createClient();
   const { error } = await supabase.auth.signUp({
     email: parsed.data.email,
@@ -39,6 +41,7 @@ export async function signUpAction(_prev: ActionState, formData: FormData): Prom
     options: {
       data: { display_name: parsed.data.displayName },
       emailRedirectTo: `${getAppBaseUrl()}/auth/confirm?type=signup`,
+      captchaToken: typeof captchaToken === "string" ? captchaToken : undefined,
     },
   });
 
@@ -63,8 +66,13 @@ export async function logInAction(_prev: ActionState, formData: FormData): Promi
     return { ok: false, fieldErrors: fieldErrorsFromZod(parsed.error) };
   }
 
+  const captchaToken = formData.get("cf-turnstile-response");
+
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
+  const { data, error } = await supabase.auth.signInWithPassword({
+    ...parsed.data,
+    options: { captchaToken: typeof captchaToken === "string" ? captchaToken : undefined },
+  });
 
   if (error) {
     // Mensagem genérica: não revela se o e-mail existe, está errado ou não foi
@@ -99,9 +107,12 @@ export async function forgotPasswordAction(
     return { ok: false, fieldErrors: fieldErrorsFromZod(parsed.error) };
   }
 
+  const captchaToken = formData.get("cf-turnstile-response");
+
   const supabase = await createClient();
   await supabase.auth.resetPasswordForEmail(parsed.data.email, {
     redirectTo: `${getAppBaseUrl()}/auth/confirm?type=recovery`,
+    captchaToken: typeof captchaToken === "string" ? captchaToken : undefined,
   });
 
   // Sempre "sucesso" do ponto de vista do usuário, exista ou não o e-mail.

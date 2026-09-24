@@ -88,9 +88,14 @@ Ver `docs/BACKUPS.md`.
 
 ## Limitações conhecidas (declaradas, não escondidas)
 
-- **2FA implementado mas opcional** — cada usuário/admin ativa por conta
-  própria em Configurações; ainda não é obrigatório para nenhum papel.
-  Reavaliar exigir obrigatório para admin antes de escalar essa base.
+- **2FA obrigatório para admin, opcional para trader** — trader ativa por
+  conta própria em Configurações; admin é bloqueado do painel
+  (`requireAdmin()`) até ativar. Reavaliar se algum papel intermediário
+  (ex.: suporte) for criado no futuro.
+- **CAPTCHA (Cloudflare Turnstile) em login/cadastro/recuperação de senha é
+  opcional** — só ativa com `NEXT_PUBLIC_TURNSTILE_SITE_KEY` configurada
+  (site key criada em https://dash.cloudflare.com/, produto Turnstile).
+  Sem essa env var, os formulários funcionam normalmente sem CAPTCHA.
 - **CSP permite `'unsafe-inline'` em `script-src`** — documentado e
   justificado em `docs/SECURITY.md`.
 - **Assinatura de webhook da Mercado Pago**: implementação reconstruída a

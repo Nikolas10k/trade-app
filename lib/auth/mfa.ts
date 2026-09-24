@@ -1,6 +1,6 @@
 import "server-only";
 import { redirect } from "next/navigation";
-import type { AuthenticatorAssuranceLevels } from "@supabase/supabase-js";
+import type { AuthenticatorAssuranceLevels, User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/db/supabase-server";
 
 export type AalStatus = {
@@ -11,6 +11,10 @@ export type AalStatus = {
 /** true quando a sessão atual ainda precisa do 2º fator antes de ir além do aal1. */
 export function needsMfaChallenge(aal: AalStatus): boolean {
   return aal.nextLevel === "aal2" && aal.currentLevel !== "aal2";
+}
+
+export function hasVerifiedTotpFactor(user: Pick<User, "factors">): boolean {
+  return user.factors?.some((f) => f.factor_type === "totp" && f.status === "verified") ?? false;
 }
 
 /**

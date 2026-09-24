@@ -116,23 +116,36 @@ documento descreve o estado real do sistema, não um objetivo aspiracional.
   (`app/(auth)/actions.ts`), para não permitir enumeração de contas.
 - Logout invalida a sessão no servidor (`supabase.auth.signOut()`, escopo
   padrão `global`).
-- **2FA/TOTP implementado** para trader e admin (opcional para ambos, por
-  ora — ver `RUNBOOK.md`): enroll/challenge/unenroll via a API nativa de MFA
-  do Supabase Auth (`lib/auth/mfa.ts`, `app/(app)/configuracoes/two-factor-*`),
-  QR code gerado pelo próprio Supabase (sem serviço de terceiro, sem
-  dependência nova). Os guards (`requireUser`/`requireAdmin`) exigem `aal2`
-  de quem tem um fator TOTP verificado antes de liberar qualquer rota
-  protegida (`lib/auth/mfa.ts:requireAal2`) — uma sessão que só passou pela
-  senha (`aal1`) é redirecionada para `/verificar-2fa`, nunca alcança
-  `/dashboard` nem `/usuarios` sem completar o 2º fator. O evento `login` no
-  `audit_log` só é gravado depois do 2º fator, quando ele existe — uma
-  sessão parcial não fica registrada como login bem-sucedido.
+- **2FA/TOTP implementado** para trader e admin: enroll/challenge/unenroll via
+  a API nativa de MFA do Supabase Auth (`lib/auth/mfa.ts`,
+  `app/(app)/configuracoes/two-factor-*`), QR code gerado pelo próprio
+  Supabase (sem serviço de terceiro, sem dependência nova). Os guards
+  (`requireUser`/`requireAdmin`) exigem `aal2` de quem tem um fator TOTP
+  verificado antes de liberar qualquer rota protegida
+  (`lib/auth/mfa.ts:requireAal2`) — uma sessão que só passou pela senha
+  (`aal1`) é redirecionada para `/verificar-2fa`, nunca alcança `/dashboard`
+  nem `/usuarios` sem completar o 2º fator. O evento `login` no `audit_log`
+  só é gravado depois do 2º fator, quando ele existe — uma sessão parcial
+  não fica registrada como login bem-sucedido.
+  Para o trader é opcional (cada um ativa por conta própria em
+  Configurações). Para admin é **obrigatório**: `requireAdmin()`
+  (`lib/auth/admin.ts`) bloqueia qualquer conta de admin sem um fator TOTP
+  verificado, redirecionando para Configurações com uma instrução — é a
+  conta com mais privilégio do sistema (lê metadados de todo usuário, opera
+  assinaturas, pode desativar o 2FA de outra conta).
   Recuperação de acesso (perda do autenticador): admin pode desativar o 2FA
   de outra conta (`admin_disable_two_factor`, via Admin Auth API,
   `lib/admin/account-actions.ts`).
-  **Lacuna conhecida**: não é obrigatório para nenhum papel ainda (fica a
-  critério de cada usuário/admin ativar) — exigir 2FA obrigatório pra admin
-  é uma melhoria natural antes de escalar a base de admins.
+- **CAPTCHA (Cloudflare Turnstile) opcional em login/cadastro/recuperação de
+  senha**: `components/turnstile-widget.tsx` não renderiza nada sem
+  `NEXT_PUBLIC_TURNSTILE_SITE_KEY` configurada — mesmo padrão condicional do
+  Sentry (ver A09). Quando configurada, o token vai como `options.captchaToken`
+  nas chamadas nativas do Supabase Auth (`signInWithPassword`, `signUp`,
+  `resetPasswordForEmail`); a chave secreta fica só no dashboard do Supabase,
+  nunca no app. Mitiga automação de força-bruta e criação massiva de contas
+  em cima dos rate limits nativos do Supabase (login: 1800 req/hora por IP;
+  MFA challenge/verify: 15 req/min por IP — já suficiente para tornar
+  força-bruta de TOTP inviável dado o código rotacionar a cada 30s).
 
 ## A08:2021 — Software and Data Integrity Failures
 

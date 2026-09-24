@@ -7,7 +7,12 @@ import { TwoFactorSection } from "./two-factor-section";
 
 export const metadata = { title: "Configurações — Diário XAU/USD" };
 
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ admin2fa?: string }>;
+}) {
+  const { admin2fa } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -24,6 +29,13 @@ export default async function SettingsPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold text-text-primary">Configurações</h1>
+
+      {admin2fa === "obrigatorio" ? (
+        <div className="rounded-xl border border-gold/30 bg-gold/10 px-4 py-3 text-sm text-text-secondary">
+          Contas de admin precisam ter a verificação em duas etapas ativada. Ative abaixo e
+          depois volte para o painel administrativo.
+        </div>
+      ) : null}
 
       <Card>
         <h2 className="mb-3 font-semibold text-text-primary">Assinatura</h2>

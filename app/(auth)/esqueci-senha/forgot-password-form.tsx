@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { Button, FieldError, Input, Label } from "@/components/ui";
+import { TurnstileWidget } from "@/components/turnstile-widget";
 import { forgotPasswordAction, type ActionState } from "../actions";
 
 const initialState: ActionState = { ok: false };
@@ -31,6 +32,7 @@ export function ForgotPasswordForm() {
         <FieldError message={state.fieldErrors?.email} />
       </div>
       {state.message ? <FieldError message={state.message} /> : null}
+      <TurnstileWidget />
       <SubmitButton />
     </form>
   );

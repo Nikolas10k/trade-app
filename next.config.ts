@@ -20,11 +20,12 @@ const csp = [
   // Um CSP com nonce por request eliminaria essa permissão, mas exige tornar
   // TODAS as páginas dinâmicas (perde o cache estático da landing/telas de
   // auth) — troca de performance que não faço sem decisão explícita.
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data:",
-  `connect-src 'self' ${supabaseOrigin} https://api.mercadopago.com`,
+  `connect-src 'self' ${supabaseOrigin} https://api.mercadopago.com https://challenges.cloudflare.com`,
   "font-src 'self' https://fonts.gstatic.com",
+  "frame-src https://challenges.cloudflare.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -40,6 +41,10 @@ const securityHeaders = [
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
   },
+  // Isola a página de outras origins que tentem obter uma referência a ela
+  // via window.open/postMessage e a impede de ser lida por embeds cross-origin.
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+  { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
 ];
 
 const nextConfig: NextConfig = {
