@@ -50,11 +50,13 @@ diário; ele só vê dados agregados de conta e assinatura (ver Seção 6).
 
 ## 4. Onde seus dados ficam armazenados
 
-Nossa infraestrutura de banco de dados está hospedada [na região X do
-Supabase — preencher com a região real do projeto]. Se essa região estiver
-fora do Brasil, isso caracteriza transferência internacional de dados nos
-termos do Art. 33 da LGPD; a base legal para essa transferência é [preencher
-— tipicamente cláusulas contratuais padrão do fornecedor de infraestrutura].
+Nossa infraestrutura de banco de dados e autenticação está hospedada pela
+Supabase na região `us-east-1` (Leste dos EUA — Norte da Virgínia, AWS),
+fora do território brasileiro. Isso caracteriza transferência internacional
+de dados nos termos do Art. 33 da LGPD. A base legal para essa transferência
+é [preencher — confirmar com o advogado o mecanismo exato: tipicamente
+cláusulas contratuais padrão adotadas pelo fornecedor de infraestrutura
+(Supabase/AWS) como sub-operador].
 
 ## 5. Por quanto tempo guardamos seus dados
 
