@@ -4,6 +4,7 @@ import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { getUserForAdmin } from "@/lib/admin/users";
 import { PLAN_LABELS, SUBSCRIPTION_STATUS_LABELS } from "@/lib/subscriptions/labels";
 import {
+  adminDisableTwoFactorAction,
   adminResendVerificationAction,
   extendTrialAction,
   forcePasswordResetAction,
@@ -48,6 +49,10 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
             <dd className={user.isSuspended ? "text-danger" : "text-success"}>
               {user.isSuspended ? "Suspenso" : "Ativo"}
             </dd>
+          </div>
+          <div className="flex justify-between">
+            <dt className="text-text-muted">Verificação em duas etapas</dt>
+            <dd className="text-text-primary">{user.hasTwoFactor ? "Ativada" : "Desativada"}</dd>
           </div>
         </dl>
       </Card>
@@ -136,6 +141,17 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
                     confirmMessage={`Reenviar e-mail de verificação para ${user.email}?`}
                   >
                     Reenviar verificação
+                  </ConfirmSubmitButton>
+                </form>
+              ) : null}
+
+              {user.hasTwoFactor ? (
+                <form action={adminDisableTwoFactorAction.bind(null, user.id)}>
+                  <ConfirmSubmitButton
+                    variant="danger"
+                    confirmMessage={`Desativar a verificação em duas etapas de ${user.email}? Use só se a pessoa perdeu o acesso ao autenticador e não consegue mais logar.`}
+                  >
+                    Desativar 2FA (recuperação de acesso)
                   </ConfirmSubmitButton>
                 </form>
               ) : null}

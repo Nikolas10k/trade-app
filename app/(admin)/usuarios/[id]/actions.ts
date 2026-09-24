@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth/admin";
-import { forcePasswordReset, resendVerificationEmail } from "@/lib/admin/account-actions";
+import { adminDisableTwoFactor, forcePasswordReset, resendVerificationEmail } from "@/lib/admin/account-actions";
 import { extendTrial, grantComp, setSuspended } from "@/lib/admin/subscription-actions";
 
 function parseDays(formData: FormData): number | null {
@@ -41,5 +41,11 @@ export async function forcePasswordResetAction(userId: string, email: string) {
 export async function adminResendVerificationAction(userId: string, email: string) {
   const { adminId } = await requireAdmin();
   await resendVerificationEmail(email, userId, adminId);
+  revalidatePath(`/usuarios/${userId}`);
+}
+
+export async function adminDisableTwoFactorAction(userId: string) {
+  const { adminId } = await requireAdmin();
+  await adminDisableTwoFactor(userId, adminId);
   revalidatePath(`/usuarios/${userId}`);
 }

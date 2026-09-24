@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/db/supabase-server";
+import { requireAal2 } from "./mfa";
 
 /**
  * Lê o usuário autenticado revalidando o JWT junto ao Supabase Auth (não confia
@@ -14,7 +15,7 @@ export async function getUser() {
   return user;
 }
 
-/** Guard para rotas do trader: exige sessão válida e e-mail verificado. */
+/** Guard para rotas do trader: exige sessão válida, e-mail verificado e 2º fator (se tiver TOTP ativo). */
 export async function requireUser() {
   const user = await getUser();
   if (!user) {
@@ -23,5 +24,6 @@ export async function requireUser() {
   if (!user.email_confirmed_at) {
     redirect("/verificar-email");
   }
+  await requireAal2();
   return user;
 }

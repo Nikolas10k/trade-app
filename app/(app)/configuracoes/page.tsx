@@ -3,6 +3,7 @@ import { Card } from "@/components/ui";
 import { createClient } from "@/lib/db/supabase-server";
 import { PLAN_LABELS, SUBSCRIPTION_STATUS_LABELS } from "@/lib/subscriptions/labels";
 import { DeleteAccountForm } from "./delete-account-form";
+import { TwoFactorSection } from "./two-factor-section";
 
 export const metadata = { title: "Configurações — Diário XAU/USD" };
 
@@ -18,6 +19,7 @@ export default async function SettingsPage() {
     .single();
 
   const renewalDate = subscription?.current_period_end ?? subscription?.trial_ends_at;
+  const totpFactor = user?.factors?.find((f) => f.factor_type === "totp" && f.status === "verified");
 
   return (
     <div className="space-y-6">
@@ -83,7 +85,8 @@ export default async function SettingsPage() {
       </Card>
 
       <Card>
-        <p className="text-text-secondary">Instrumento, preferências e segurança (2FA) chegam na Fase 8.</p>
+        <h2 className="mb-3 font-semibold text-text-primary">Verificação em duas etapas (2FA)</h2>
+        <TwoFactorSection initialEnabled={Boolean(totpFactor)} initialFactorId={totpFactor?.id ?? null} />
       </Card>
     </div>
   );

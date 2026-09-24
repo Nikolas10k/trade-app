@@ -9,6 +9,9 @@ export const AUDIT_ACTION_LABELS: Record<string, string> = {
   admin_reactivate: "Admin: conta reativada",
   admin_force_password_reset: "Admin: reset de senha forçado",
   admin_resend_verification: "Admin: reenvio de verificação",
+  two_factor_enabled: "2FA ativado",
+  two_factor_disabled: "2FA desativado",
+  admin_disable_two_factor: "Admin: 2FA desativado (recuperação de acesso)",
 };
 
 export function auditActionLabel(action: string): string {

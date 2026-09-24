@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { logAuditEvent } from "@/lib/audit/log";
+import { needsMfaChallenge } from "@/lib/auth/mfa";
 import { getAppBaseUrl } from "@/lib/db/env";
 import { createClient } from "@/lib/db/supabase-server";
 import {
@@ -71,7 +72,14 @@ export async function logInAction(_prev: ActionState, formData: FormData): Promi
     return { ok: false, message: "E-mail ou senha inválidos, ou conta ainda não verificada." };
   }
 
-  await logAuditEvent({ actorId: data.user.id, userId: data.user.id, action: "login" });
+  // Com 2FA ativo, o login só está de fato completo depois do 2º fator
+  // (verifyTwoFactorAction registra o evento nesse caso) — senão o audit_log
+  // teria um "login" bem-sucedido pra uma sessão que ainda pode ser barrada
+  // logo em seguida pelo guard.
+  const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (!aal || !needsMfaChallenge(aal)) {
+    await logAuditEvent({ actorId: data.user.id, userId: data.user.id, action: "login" });
+  }
 
   redirect("/dashboard");
 }

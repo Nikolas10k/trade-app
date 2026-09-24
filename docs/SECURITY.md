@@ -116,11 +116,23 @@ documento descreve o estado real do sistema, não um objetivo aspiracional.
   (`app/(auth)/actions.ts`), para não permitir enumeração de contas.
 - Logout invalida a sessão no servidor (`supabase.auth.signOut()`, escopo
   padrão `global`).
-- **Lacuna conhecida e documentada**: 2FA/TOTP ainda não está implementado —
-  nem para trader (opcional, conforme a Seção 9.2) nem para admin
-  (fortemente recomendado/obrigatório pela mesma seção). Ficou fora do
-  escopo desta fase por decisão explícita com o cliente; é a pendência mais
-  significativa para o checklist de go-live (Seção 14).
+- **2FA/TOTP implementado** para trader e admin (opcional para ambos, por
+  ora — ver `RUNBOOK.md`): enroll/challenge/unenroll via a API nativa de MFA
+  do Supabase Auth (`lib/auth/mfa.ts`, `app/(app)/configuracoes/two-factor-*`),
+  QR code gerado pelo próprio Supabase (sem serviço de terceiro, sem
+  dependência nova). Os guards (`requireUser`/`requireAdmin`) exigem `aal2`
+  de quem tem um fator TOTP verificado antes de liberar qualquer rota
+  protegida (`lib/auth/mfa.ts:requireAal2`) — uma sessão que só passou pela
+  senha (`aal1`) é redirecionada para `/verificar-2fa`, nunca alcança
+  `/dashboard` nem `/usuarios` sem completar o 2º fator. O evento `login` no
+  `audit_log` só é gravado depois do 2º fator, quando ele existe — uma
+  sessão parcial não fica registrada como login bem-sucedido.
+  Recuperação de acesso (perda do autenticador): admin pode desativar o 2FA
+  de outra conta (`admin_disable_two_factor`, via Admin Auth API,
+  `lib/admin/account-actions.ts`).
+  **Lacuna conhecida**: não é obrigatório para nenhum papel ainda (fica a
+  critério de cada usuário/admin ativar) — exigir 2FA obrigatório pra admin
+  é uma melhoria natural antes de escalar a base de admins.
 
 ## A08:2021 — Software and Data Integrity Failures
 

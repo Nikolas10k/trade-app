@@ -88,8 +88,9 @@ Ver `docs/BACKUPS.md`.
 
 ## Limitações conhecidas (declaradas, não escondidas)
 
-- **2FA não implementado** — decisão explícita para o MVP (ver histórico do
-  projeto); reavaliar antes de escalar a base de admins.
+- **2FA implementado mas opcional** — cada usuário/admin ativa por conta
+  própria em Configurações; ainda não é obrigatório para nenhum papel.
+  Reavaliar exigir obrigatório para admin antes de escalar essa base.
 - **CSP permite `'unsafe-inline'` em `script-src`** — documentado e
   justificado em `docs/SECURITY.md`.
 - **Assinatura de webhook da Mercado Pago**: implementação reconstruída a

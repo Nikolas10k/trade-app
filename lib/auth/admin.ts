@@ -1,5 +1,6 @@
 import { forbidden, redirect } from "next/navigation";
 import { getUser } from "./session";
+import { requireAal2 } from "./mfa";
 import { createClient } from "@/lib/db/supabase-server";
 
 /**
@@ -12,6 +13,7 @@ export async function requireAdmin(): Promise<{ adminId: string }> {
   if (!user) {
     redirect("/login");
   }
+  await requireAal2();
 
   const supabase = await createClient();
   const { data: isAdmin, error } = await supabase.rpc("is_admin");

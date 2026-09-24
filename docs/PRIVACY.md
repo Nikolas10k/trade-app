@@ -92,9 +92,9 @@ indicado no topo deste documento.
 
 Descrevemos as medidas técnicas de segurança em detalhe em `SECURITY.md` —
 RLS em todo dado de usuário, TLS obrigatório, segredos nunca expostos ao
-cliente, senha com hash pelo Supabase Auth, e outras. Note que 2FA
-(autenticação em duas etapas) ainda não está disponível na aplicação — é
-uma pendência conhecida antes do lançamento público.
+cliente, senha com hash pelo Supabase Auth, e outras. Você pode ativar a
+verificação em duas etapas (2FA) na tela de Configurações para uma camada
+extra de proteção — hoje é opcional.
 
 ## 9. Resposta a incidentes
 

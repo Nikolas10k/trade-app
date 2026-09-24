@@ -14,7 +14,12 @@ export type AdminUserRow = {
   currentPeriodEnd: string | null;
   compUntil: string | null;
   isSuspended: boolean;
+  hasTwoFactor: boolean;
 };
+
+function hasVerifiedTotp(user: User): boolean {
+  return user.factors?.some((f) => f.factor_type === "totp" && f.status === "verified") ?? false;
+}
 
 /**
  * E-mail e metadados de conta só existem em auth.users, que não é exposto
@@ -70,6 +75,7 @@ export async function listUsersForAdmin(): Promise<AdminUserRow[]> {
       currentPeriodEnd: sub?.current_period_end ?? null,
       compUntil: sub?.comp_until ?? null,
       isSuspended: suspendedByUser.get(u.id) ?? false,
+      hasTwoFactor: hasVerifiedTotp(u),
     };
   });
 }
@@ -106,5 +112,6 @@ export async function getUserForAdmin(userId: string): Promise<AdminUserRow | nu
     currentPeriodEnd: subscription?.current_period_end ?? null,
     compUntil: subscription?.comp_until ?? null,
     isSuspended: profile?.is_suspended ?? false,
+    hasTwoFactor: hasVerifiedTotp(authData.user),
   };
 }

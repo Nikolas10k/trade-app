@@ -50,6 +50,15 @@ export const resetPasswordSchema = z
 
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 
+export const verifyTwoFactorSchema = z.object({
+  code: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, "Digite os 6 dígitos do código."),
+});
+
+export type VerifyTwoFactorInput = z.infer<typeof verifyTwoFactorSchema>;
+
 /** Score 0-4 só para feedback visual do medidor de força — não substitui a validação acima. */
 export function passwordStrength(value: string): number {
   let score = 0;

@@ -16,6 +16,7 @@ function makeUser(overrides: Partial<AdminUserRow> = {}): AdminUserRow {
     currentPeriodEnd: null,
     compUntil: null,
     isSuspended: false,
+    hasTwoFactor: false,
     ...overrides,
   };
 }
