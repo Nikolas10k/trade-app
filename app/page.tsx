@@ -2,6 +2,9 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Card } from "@/components/ui";
 import { HeroVideoBackground } from "@/components/hero-video-background";
+import { formatMoney } from "@/lib/calc";
+import { PLAN_LABELS } from "@/lib/subscriptions/labels";
+import { PLAN_BILLING, PLAN_ORDER, monthlyEquivalent } from "@/lib/subscriptions/pricing";
 import { AccountDeletedBanner } from "./account-deleted-banner";
 
 const ctaClass =
@@ -67,6 +70,40 @@ export default function LandingPage() {
               win rate por zona.
             </p>
           </Card>
+        </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-5xl px-6 pb-16">
+        <div className="mb-8 text-center">
+          <h2 className="text-2xl font-bold text-text-primary">Planos</h2>
+          <p className="mt-2 text-sm text-text-muted">
+            3 dias de teste grátis, sem cartão de crédito. Cancele quando quiser.
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          {PLAN_ORDER.map((key) => {
+            const { price, months, periodLabel } = PLAN_BILLING[key];
+            return (
+              <Card
+                key={key}
+                className={key === "anual" ? "border-gold/40 bg-gradient-to-br from-gold/10 to-transparent" : undefined}
+              >
+                <h3 className="mb-1 font-semibold text-text-primary">{PLAN_LABELS[key]}</h3>
+                <p className="mb-4 text-2xl font-bold text-text-primary">
+                  {formatMoney(price)}
+                  <span className="text-sm font-normal text-text-muted"> /{periodLabel}</span>
+                  {months > 1 ? (
+                    <span className="block text-sm font-normal text-text-muted">
+                      ≈ {formatMoney(monthlyEquivalent(key))}/mês
+                    </span>
+                  ) : null}
+                </p>
+                <Link href="/cadastro" className={`${ctaClass} w-full`}>
+                  Começar 3 dias grátis
+                </Link>
+              </Card>
+            );
+          })}
         </div>
       </section>
 

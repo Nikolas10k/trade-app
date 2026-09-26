@@ -67,6 +67,13 @@ body {
   }
 }
 
+/* Véu uniforme (não diagonal) — a tela de criar conta tem um card estreito
+   centralizado, não um texto largo de hero, então precisa de contraste igual
+   em toda a viewport. */
+.signup-video-overlay {
+  background: rgba(11, 11, 15, 0.75);
+}
+
 /*
  * Fundo ambiente reutilizável (orbs com glow + grade sutil) — usado no hero da
  * landing page e no painel da tela de login para dar identidade visual coesa
