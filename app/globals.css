@@ -74,40 +74,16 @@ body {
   background: rgba(11, 11, 15, 0.75);
 }
 
-/*
- * Fundo ambiente reutilizável (orbs com glow + grade sutil) — usado no hero da
- * landing page e no painel da tela de login para dar identidade visual coesa
- * sem depender de imagens/vídeos externos.
- */
-.ambient-bg {
-  position: relative;
-  background: radial-gradient(circle at 15% 15%, #17131f 0%, var(--color-bg) 55%);
-}
-
-.ambient-orb {
-  position: absolute;
-  border-radius: 9999px;
-  filter: blur(90px);
-  opacity: 0.35;
-  animation: ambient-orb-float 14s ease-in-out infinite;
-  pointer-events: none;
-}
-
-.ambient-orb-gold {
-  top: -8rem;
-  right: -6rem;
-  height: 22rem;
-  width: 22rem;
-  background: var(--color-gold);
-}
-
-.ambient-orb-blue {
-  bottom: -10rem;
-  left: -8rem;
-  height: 26rem;
-  width: 26rem;
-  background: var(--color-secondary);
-  animation-delay: -7s;
+/* Painel lateral do login: mais escuro embaixo (título/texto) e no topo
+   (logo), respirando um pouco mais no meio do vídeo. */
+.login-video-overlay {
+  background: linear-gradient(
+    to top,
+    rgba(11, 11, 15, 0.92) 0%,
+    rgba(11, 11, 15, 0.45) 35%,
+    rgba(11, 11, 15, 0.5) 65%,
+    rgba(11, 11, 15, 0.75) 100%
+  );
 }
 
 .ambient-grid {
@@ -145,16 +121,6 @@ body {
   mask-composite: exclude;
   pointer-events: none;
   z-index: -1;
-}
-
-@keyframes ambient-orb-float {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(-1.5rem, 1.5rem) scale(1.08);
-  }
 }
 
 @keyframes ambient-chart-draw {
