@@ -6,6 +6,7 @@ import { formatMoney } from "@/lib/calc";
 import { PLAN_LABELS } from "@/lib/subscriptions/labels";
 import { PLAN_BILLING, PLAN_ORDER, monthlyEquivalent } from "@/lib/subscriptions/pricing";
 import { AccountDeletedBanner } from "./account-deleted-banner";
+import { AppScreenshots } from "./app-screenshots";
 
 const ctaClass =
   "inline-flex items-center justify-center rounded-lg bg-gradient-brand px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/30 hover:brightness-110";
@@ -72,6 +73,8 @@ export default function LandingPage() {
           </Card>
         </div>
       </section>
+
+      <AppScreenshots />
 
       <section className="mx-auto w-full max-w-5xl px-6 pb-16">
         <div className="mb-8 text-center">
