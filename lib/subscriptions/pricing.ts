@@ -19,3 +19,13 @@ export function monthlyEquivalent(plan: PlanKey): Decimal {
   const { price, months } = PLAN_BILLING[plan];
   return price.dividedBy(months);
 }
+
+/** Quanto esse plano economiza frente a pagar o plano mensal pelo mesmo número de meses — null para o próprio mensal. */
+export function savingsVsMonthly(plan: PlanKey): { amount: Decimal; pct: Decimal } | null {
+  if (plan === "mensal") return null;
+  const { price, months } = PLAN_BILLING[plan];
+  const equivalentMonthlyTotal = PLAN_BILLING.mensal.price.times(months);
+  const amount = equivalentMonthlyTotal.minus(price);
+  const pct = amount.dividedBy(equivalentMonthlyTotal).times(100);
+  return { amount, pct };
+}
